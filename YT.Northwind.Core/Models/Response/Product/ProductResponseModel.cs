@@ -1,6 +1,6 @@
 ﻿
 
-using Northwind.Core.Models.Response.Category;
+using Northwind.Entities.Concrete;
 
 namespace Northwind.Core.Models.Response.Product
 {
@@ -11,6 +11,9 @@ namespace Northwind.Core.Models.Response.Product
         public string ProductName { get; set; }
         public string QuantityPerUnit { get; set; }
         public decimal UnitPrice { get; set; }
-   
+        public string Description { get; set; } 
+        public virtual ICollection<ProductImage> ProductImages { get; set; }
+
+
     }
 }

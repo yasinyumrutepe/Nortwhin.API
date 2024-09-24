@@ -22,6 +22,8 @@ namespace Northwind.Business.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IRedisService, RedisService>();
             services.AddScoped<IBasketService, BasketService>();
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
+
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
