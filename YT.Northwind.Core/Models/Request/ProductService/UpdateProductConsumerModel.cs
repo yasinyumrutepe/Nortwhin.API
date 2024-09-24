@@ -1,8 +1,9 @@
-﻿using Northwind.Entities.Concrete;
+﻿
+using Northwind.Entities.Concrete;
 
-namespace Northwind.Core.Models.Request.Product
+namespace Northwind.Core.Models.Request.ProductService
 {
-    public class ProductUpdateRequestModel
+    public class UpdateProductConsumerModel
     {
         public int ProductID { get; set; }
         public int CategoryID { get; set; }

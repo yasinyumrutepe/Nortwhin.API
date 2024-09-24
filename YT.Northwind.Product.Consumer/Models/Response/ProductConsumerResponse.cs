@@ -1,8 +1,9 @@
 ﻿using Northwind.Entities.Concrete;
 
-namespace Northwind.Core.Models.Request.Product
+
+namespace Northwind.Product.Consumer.Models.Response
 {
-    public class ProductUpdateRequestModel
+    public class ProductConsumerResponse
     {
         public int ProductID { get; set; }
         public int CategoryID { get; set; }
@@ -10,5 +11,6 @@ namespace Northwind.Core.Models.Request.Product
         public string QuantityPerUnit { get; set; }
         public decimal UnitPrice { get; set; }
         public string Description { get; set; }
+        public ICollection<ProductImage> ProductImages { get; set; }
     }
 }

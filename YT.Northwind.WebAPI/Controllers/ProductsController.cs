@@ -35,10 +35,11 @@ namespace Northwind.WebAPI.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> Add([FromBody] ProductRequestModel product)
+        public async Task<IActionResult> Add([FromForm] ProductRequestModel product)
         {
             var addedProduct = await _productService.AddProductAsync(product);
-            return CreatedAtAction(nameof(Get), new { id = addedProduct.ProductID }, addedProduct);
+            return Ok(addedProduct);
+
         }
 
         [HttpPut]

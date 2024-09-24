@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Northwind.Core.Models.Response.Cloudinary;
+using System;
 
-namespace Northwind.Core.Models.Request.Product
+
+namespace Northwind.Product.Consumer.Models.Request
 {
-    public class ProductRequestModel
+    public class AddProductConsumerRequest
     {
+     
         public string ProductName { get; set; }
         public int CategoryID { get; set; }
         public decimal UnitPrice { get; set; }
         public string QuantityPerUnit { get; set; }
         public string Description { get; set; }
-        public IFormFile[] Images { get; set; }
+        public List<UploadImageResponseModel> ProductImages { get; set; }
+
+
+
     }
 }

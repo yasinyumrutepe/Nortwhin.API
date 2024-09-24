@@ -85,9 +85,20 @@ namespace Northwind.DataAccess.Repositories.Concrete
         }
         public async Task<TEntity> AddAsync(TEntity entity)
         {   
-            await  _context.Set<TEntity>().AddAsync(entity);
-            await _context.SaveChangesAsync();
-            return entity;
+            try
+            {
+                await _context.Set<TEntity>().AddAsync(entity);
+                await _context.SaveChangesAsync();
+                return entity;
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException?.Message;
+                Console.WriteLine(innerException);
+                return null;
+            }
+           
+          
         }
         public async Task<TEntity> UpdateAsync(TEntity entity)
         {
