@@ -30,7 +30,7 @@ namespace Northwind.Business.Concrete
 
         public async Task<EmployeeResponseModel> GetEmployeeAsync(int id)
         {
-            return _mapper.Map<EmployeeResponseModel>(await _employeeRepository.GetAsync(id));
+            return _mapper.Map<EmployeeResponseModel>(await _employeeRepository.GetAsync(e=>e.EmployeeID == id));
         }
 
         public async Task<EmployeeResponseModel> UpdateEmployeeAsync(EmployeeUpdateRequestModel employee)

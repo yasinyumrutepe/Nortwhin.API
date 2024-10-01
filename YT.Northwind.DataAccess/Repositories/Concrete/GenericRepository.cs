@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Response;
 using Northwind.DataAccess.Repositories.Abstract;
+using Northwind.Entities.Concrete;
 
 namespace Northwind.DataAccess.Repositories.Concrete
 {
@@ -51,8 +52,6 @@ namespace Northwind.DataAccess.Repositories.Concrete
         }
 
 
-
-
         public async Task<List<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
         {   
 
@@ -63,15 +62,22 @@ namespace Northwind.DataAccess.Repositories.Concrete
             }
            return await query.ToListAsync();
         }
-
-        public async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await _dbSet.FirstOrDefaultAsync(predicate);
-        }
-
         public async Task<TEntity> GetAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            try
+            {
+                return await _context.Set<TEntity>().FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                return null;
+            }
         }
         public async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
         {
@@ -108,9 +114,23 @@ namespace Northwind.DataAccess.Repositories.Concrete
         }
         public async Task<int> DeleteAsync(int id)
         {
-            var entity = await GetAsync(id);
-            _context.Set<TEntity>().Remove(entity);
-           return  await _context.SaveChangesAsync();
+            try
+            {
+                var entity = await _context.Set<TEntity>().FindAsync(id);
+                if (entity == null)
+                {
+                    return 0;
+                }
+                _context.Set<TEntity>().Remove(entity);
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                var innerException = ex.InnerException?.Message;
+                Console.WriteLine(innerException);
+                return 0;
+            }
+
         }
 
        

@@ -1,7 +1,6 @@
 ﻿
 using AutoMapper;
 using MassTransit;
-using MassTransit.Clients;
 using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Request.Product;
@@ -9,19 +8,18 @@ using Northwind.Core.Models.Request.ProductService;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Product;
 using Northwind.Core.Models.Response.ProductService;
-using Northwind.DataAccess.Repositories.Abstract;
 using Northwind.Entities.Concrete;
 
 
 namespace Northwind.Business.Concrete
 {
-    public class ProductService(IProductRepository productRepository,IMapper mapper, IBus bus,ICloudinaryService cloudinaryService) : IProductService
+    public class ProductService(IMapper mapper, IBus bus,ICloudinaryService cloudinaryService) : IProductService
     {
-        private readonly IProductRepository _productRepository = productRepository;
         private readonly IMapper _mapper = mapper;
         private readonly IBus _bus = bus;
         private readonly ICloudinaryService _cloudinaryService = cloudinaryService;
 
+        #region GetAllProducts
         public async Task<PaginatedResponse<ProductResponseModel>> GetAllProductAsync(PaginatedRequest paginated)
         {
             var request =  _bus.CreateRequestClient<GetAllProductConsumerModel>();
@@ -33,7 +31,9 @@ namespace Northwind.Business.Concrete
 
               return  _mapper.Map<PaginatedResponse<ProductResponseModel>>(response.Message);
         }
+        #endregion
 
+        #region GetProducts
         public async Task<ProductResponseModel> GetProductAsync(int id)
         {
             var request = _bus.CreateRequestClient<GetProductConsumerModel>();
@@ -43,6 +43,22 @@ namespace Northwind.Business.Concrete
             });
             return _mapper.Map<ProductResponseModel>(response.Message); 
         }
+        #endregion
+
+        #region GetProductsByCategory
+        public async Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest)
+        {
+            var request = _bus.CreateRequestClient<GetProductsByCategoryConsumerModel>();
+            var response = await request.GetResponse<PaginatedResponse<Product>>(new GetProductsByCategoryConsumerModel{
+                Page = categoryProductsRequest.Page,
+                Limit = categoryProductsRequest.Limit,
+                CategoryID = categoryProductsRequest.CategoryID
+            });
+            return _mapper.Map<PaginatedResponse<ProductResponseModel>>(response.Message);
+        }
+        #endregion
+
+        #region AddProduct
         public async Task<string> AddProductAsync(ProductRequestModel product)
         {
 
@@ -62,6 +78,9 @@ namespace Northwind.Business.Concrete
 
             return "Product Added Send Queue";
         }
+        #endregion
+
+        #region UpdateProductAsync
         public async Task<ProductResponseModel> UpdateProductAsync(ProductUpdateRequestModel product)
         {
             var updateReq = _bus.CreateRequestClient<UpdateProductConsumerModel>();
@@ -73,11 +92,15 @@ namespace Northwind.Business.Concrete
                 QuantityPerUnit = product.QuantityPerUnit,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
+
             });
 
             return  _mapper.Map<ProductResponseModel>(updateRes.Message);
         }
 
+        #endregion
+
+        #region DeleteProduct
         public async Task<int> DeleteProductAsync(int id)
         {
 
@@ -88,5 +111,9 @@ namespace Northwind.Business.Concrete
             });
             return response.Message.IsDeleted;
         }
+        #endregion
+
+
+
     }
 }

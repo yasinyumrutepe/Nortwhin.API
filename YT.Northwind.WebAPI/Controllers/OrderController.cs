@@ -40,9 +40,15 @@ namespace Northwind.WebAPI.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> Add([FromBody] OrderRequestModel order)
+        public async Task<IActionResult> Add()
         {
-            var addedOrder = await _orderService.AddOrderAsync(order);
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+            var addedOrder = await _orderService.AddOrderAsync(token);
             return CreatedAtAction("Get", new { id = addedOrder.OrderID }, addedOrder);
         }
 

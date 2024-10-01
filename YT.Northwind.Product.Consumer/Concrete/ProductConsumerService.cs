@@ -1,7 +1,6 @@
 ﻿using Northwind.DataAccess.Repositories.Abstract;
 using Northwind.Product.Consumer.Models.Request;
 using Northwind.Product.Consumer.Abstract;
-using Northwind.Product.Consumer.Models.Response;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.ProductService;
@@ -81,5 +80,15 @@ namespace Northwind.Product.Consumer.Concrete
             };
         }
 
+        public async Task<PaginatedResponse<Entities.Concrete.Product>> GetProductsByCategoryAsync(CategoryProductsConsumerRequest categoryProductsRequest)
+        {
+            var paginatedRequest = new PaginatedRequest
+            {
+                Limit = categoryProductsRequest.Limit,
+                Page = categoryProductsRequest.Page
+            };
+
+           return  await _productRepository.GetAllAsync(paginatedRequest, p=>p.CategoryID == categoryProductsRequest.CategoryID, i => i.ProductImages);
+        }
     }
 }

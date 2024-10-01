@@ -8,7 +8,7 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
     {
         public NorthwindContext(DbContextOptions<NorthwindContext> options) : base(options)
         {
-
+            
         }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -20,6 +20,9 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserType> UserTypes { get; set; }
+        public DbSet<Campaign> Campaigns { get; set; }
+
 
 
 

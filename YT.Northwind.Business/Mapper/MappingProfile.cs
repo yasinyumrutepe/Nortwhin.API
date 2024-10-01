@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Northwind.Core.Models.Request.Campaign;
 using Northwind.Core.Models.Request.Category;
 using Northwind.Core.Models.Request.Customer;
 using Northwind.Core.Models.Request.Employee;
@@ -6,6 +7,7 @@ using Northwind.Core.Models.Request.Order;
 using Northwind.Core.Models.Request.Product;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Auth;
+using Northwind.Core.Models.Response.Campaign;
 using Northwind.Core.Models.Response.Category;
 using Northwind.Core.Models.Response.Customer;
 using Northwind.Core.Models.Response.Employee;
@@ -58,6 +60,10 @@ namespace Northwind.Business.Mapper
             CreateMap<User, UserResponseModel>();
             //RegisterRequestModel to User
 
+
+            //CampaignRequestModel to Campaign
+           CreateMap<CampaignRequestModel, Campaign>();
+            CreateMap<Campaign, CampaignResponseModel>();
 
 
 

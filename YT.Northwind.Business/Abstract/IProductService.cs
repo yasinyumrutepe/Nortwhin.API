@@ -1,5 +1,6 @@
 ﻿using  Northwind.Core.Models.Request;
 using Northwind.Core.Models.Request.Product;
+using Northwind.Core.Models.Request.ProductService;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Product;
 
@@ -11,6 +12,8 @@ namespace Northwind.Business.Abstract
         Task<PaginatedResponse<ProductResponseModel>> GetAllProductAsync(PaginatedRequest paginatedRequest);
 
         Task<ProductResponseModel> GetProductAsync(int id);
+
+        Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest);
         Task<string> AddProductAsync(ProductRequestModel product);
         Task<ProductResponseModel> UpdateProductAsync(ProductUpdateRequestModel product);
         Task<int> DeleteProductAsync(int id);

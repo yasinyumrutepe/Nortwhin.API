@@ -3,7 +3,6 @@ using MassTransit;
 using Northwind.Core.Models.Request.ProductService;
 using Northwind.Product.Consumer.Abstract;
 using Northwind.Product.Consumer.Models.Request;
-using Northwind.Product.Consumer.Models.Response;
 
 namespace Northwind.Product.Consumer
 {
