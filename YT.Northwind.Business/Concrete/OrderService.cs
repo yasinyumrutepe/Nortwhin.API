@@ -10,11 +10,12 @@ using Northwind.Entities.Concrete;
 
 namespace Northwind.Business.Concrete
 {
-    public class OrderService(IOrderRepository orderRepository,IMapper mapper,ITokenService tokenService) : IOrderService
+    public class OrderService(IOrderRepository orderRepository,IMapper mapper,ITokenService tokenService,IBasketService basketService) : IOrderService
     { 
         private readonly IOrderRepository _orderRepository = orderRepository;
         private readonly IMapper _mapper = mapper;
         private readonly ITokenService _tokenService = tokenService;
+        private readonly IBasketService _basketService = basketService;
 
 
 
@@ -29,9 +30,30 @@ namespace Northwind.Business.Concrete
         }
 
 
-        public async Task<OrderResponseModel> AddOrderAsync(OrderRequestModel order)
-        {   
-            var customerID = _tokenService.GetCustomerIDClaim(order.Token);
+        public async Task<OrderResponseModel> AddOrderAsync(string token)
+        {       
+            var customerID = _tokenService.GetCustomerIDClaim(token);
+            var basket = _basketService.GetBasket(token);
+            var orderDetails = new List<OrderDetailRequestModel>();
+
+            foreach (var item in basket.Items) {
+                var orderDetail = new OrderDetailRequestModel
+                {
+                    ProductID = item.ProductID,
+                    Quantity = short.Parse(item.Quantity.ToString()),
+                    UnitPrice = item.UnitPrice,
+                    Discount = false
+                };
+                orderDetails.Add(orderDetail);
+            }
+            var order = new OrderRequestModel
+            {
+                OrderDate = DateTime.Now,
+                RequiredDate = DateTime.Now.AddDays(7),
+                ShippedDate = DateTime.Now.AddDays(1),
+                OrderDetails = orderDetails
+            };
+
             var orderEntity = _mapper.Map<Order>(new Order
             {
                 CustomerID = customerID,

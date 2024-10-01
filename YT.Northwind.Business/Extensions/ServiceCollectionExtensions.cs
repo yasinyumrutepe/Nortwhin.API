@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Northwind.Business.Abstract;
 using Northwind.Business.Concrete;
+using Northwind.Business.Filter;
 
 
 namespace Northwind.Business.Extensions
@@ -23,6 +24,9 @@ namespace Northwind.Business.Extensions
             services.AddScoped<IRedisService, RedisService>();
             services.AddScoped<IBasketService, BasketService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
+            services.AddScoped<IProductImageService, ProductImageService>();
+            services.AddScoped<ICampaignService, CampaignService>();
+            services.AddScoped<CustomAuthorizationFilter>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 

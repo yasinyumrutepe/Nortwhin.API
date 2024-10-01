@@ -22,11 +22,14 @@ namespace Northwind.Business.Concrete
                      new(ClaimTypes.Name, "USER"),
                      new(ClaimTypes.NameIdentifier, user.UserID.ToString()),
                      new(ClaimTypes.Email, user.Email),
-                     new(JwtRegisteredClaimNames.Sub,user.CustomerID)
+                     new(JwtRegisteredClaimNames.Sub,user.CustomerID),
+                     new("UserTypeID", user.UserTypeID.ToString())
+
 
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+
             };
 
 
@@ -38,9 +41,7 @@ namespace Northwind.Business.Concrete
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
-
             var customerIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
-
             return customerIdClaim?.Value;
         }
     }

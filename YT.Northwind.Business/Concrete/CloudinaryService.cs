@@ -17,10 +17,23 @@ namespace Northwind.Business.Concrete
             _cloudinary = cloudinary;
 
         }
-        public Task<DelResResult> DeleteImageAsync(string publicId)
-        {   
-            var deletedResult = _cloudinary.DeleteResourcesAsync(publicId);
-            return  deletedResult;
+        public async Task<DelResResult> DeleteImageAsync(string publicId)
+        {
+            try
+            {
+                var deletedResult = await _cloudinary.DeleteResourcesAsync(publicId);
+                return deletedResult;
+
+            }catch (Exception ex)
+            {
+                return new DelResResult
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Error = new Error { Message = ex.Message }
+
+
+                };
+            }
         }
 
         public async Task<List<UploadImageResponseModel>> UploadImageAsync(IFormFile[] images, string folderName)

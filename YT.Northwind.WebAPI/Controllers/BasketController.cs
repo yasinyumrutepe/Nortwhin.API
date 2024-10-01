@@ -9,13 +9,9 @@ namespace Northwind.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BasketController : Controller
-    {   
-        private readonly IBasketService _basketService;
-        public BasketController(IBasketService basketService)
-        {
-            _basketService = basketService;
-        }
+    public class BasketController(IBasketService basketService) : Controller
+    {
+        private readonly IBasketService _basketService = basketService;
 
         [HttpGet]
         public IActionResult GetAllBasket()
@@ -24,17 +20,77 @@ namespace Northwind.WebAPI.Controllers
 
         }
 
-        [HttpGet("{basketId}")]
-        public IActionResult GetBasket(Guid basketId)
+        [HttpGet("detail")]
+        public IActionResult GetBasket()
         {
-          return Ok(  _basketService.GetBasket(basketId));
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+
+            return Ok(_basketService.GetBasket(token));
         }
 
         [HttpPost]
-        public IActionResult AddToBasket(List<BasketRequestModel> basketRequest)
+        public IActionResult AddToBasket(BasketRequestModel basketRequest)
         {
-          var basket =  _basketService.AddToBasket(basketRequest);
+
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+
+            var basket = _basketService.AddToBasket(basketRequest, token);
             return Ok(basket);
+        }
+
+        [HttpPut("quantity")]
+        public IActionResult ChangeQuantity(ChangeQuantityRequestModel changeQuantityRequestModel)
+        {
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+            var basket = _basketService.UpdateQuantity(token, changeQuantityRequestModel.ProductID, changeQuantityRequestModel.Quantity);
+            return Ok(basket);
+        }
+
+        [HttpDelete("{productID}")]
+        public IActionResult DeleteFromBasket(int productID)
+        {
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+
+            var basket = _basketService.DeleteFromBasket(token, productID);
+            return Ok(basket);
+        }
+
+
+
+        [HttpGet("campaign/{campaignName}")]
+        public async Task<IActionResult> AddCampaign(string campaignName)
+        {
+
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+          var basketReq =  await _basketService.AddCampaign(token, campaignName);
+
+            return Ok(basketReq);
+
         }
     }
 }

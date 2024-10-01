@@ -1,89 +1,186 @@
-﻿using Northwind.Business.Abstract;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request.Basket;
 using Northwind.Core.Models.Response.Basket;
+using Northwind.Entities.Concrete;
+using RTools_NTS.Util;
+using StackExchange.Redis;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Northwind.Business.Concrete
 {
-    public class BasketService : IBasketService
+    public class BasketService(IRedisService redisService, ITokenService token,ICampaignService campaignService) : IBasketService
     {
-        private readonly IRedisService _redisService;
-        private readonly IProductService _productService;
-
-        public BasketService(IRedisService redisService, IProductService productService)
-        {
-            _redisService = redisService;
-            _productService = productService;
-        }
-
+        private readonly IRedisService _redisService = redisService;
+        private readonly ITokenService _tokenService = token;
+        private readonly ICampaignService _campaignService = campaignService;
 
         public BasketResponseModel GetAllBasket()
         {
             return _redisService.GetData<BasketResponseModel>("basket");
         }
-        public async Task<BasketResponseModel> AddToBasket(List<BasketRequestModel> basketRequests)
-        {
-            var redisBasketData = _redisService.GetData<List<BasketRequestModel>>("basket");
-            if (redisBasketData == null)
-            {
-               
-                _redisService.SetData("basket", basketRequests);
-            }else
-            {
 
-                basketRequests.ForEach(x =>
+        #region AddToBasket
+        public async Task<BasketResponseModel> AddToBasket(BasketRequestModel basketRequests,string token)
+        {
+            var customerId = _tokenService.GetCustomerIDClaim(token);
+
+            var basketId = GenerateHashedBasketId(customerId);
+
+            var existingBasket = _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+
+            if (existingBasket != null)
+            {
+                // Gelen ürünleri kontrol et
+                foreach (var item in basketRequests.Items)
                 {
-                    var product = redisBasketData.FirstOrDefault(y => y.ProductID == x.ProductID);
-                    if (product == null)
+                    var existingItem = existingBasket.Items.FirstOrDefault(i => i.ProductID == item.ProductID);
+
+                    if (existingItem != null)
                     {
-                        redisBasketData.Add(x);
+                        existingItem.Quantity += item.Quantity;
                     }
                     else
                     {
-                        product.Quantity += x.Quantity;
+                        existingBasket.Items.Add(item);
                     }
-                });
-                _redisService.SetData("basket", redisBasketData);
-
-
-
+                }
             }
-            var basketResponse = new BasketResponseModel();
-            var returnBasketData = _redisService.GetData<List<BasketRequestModel>>("basket");
-
-            foreach (var item in returnBasketData)
+            else
             {
-                var product = await _productService.GetProductAsync(item.ProductID);
-                basketResponse.Products.Add(new BasketCacheModel
+                basketRequests.BasketID = basketId;
+                existingBasket = basketRequests;
+            }
+
+            _redisService.SetData($"basket:{basketId}", existingBasket);
+
+            var response = new BasketResponseModel
+            {
+                BasketId = basketId,
+                TotalPrice = existingBasket.TotalPrice,
+                Items = existingBasket.Items,
+                Message = "Product(s) successfully added to the basket."
+            };
+
+            return await Task.FromResult(response);
+
+
+
+        }
+        #endregion
+
+        #region GetBasket
+        public BasketRequestModel GetBasket(string token)
+        {
+            var customerId = _tokenService.GetCustomerIDClaim(token);
+
+            var basketId = GenerateHashedBasketId(customerId);
+
+            return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+
+        }
+        #endregion
+
+        #region UpdateQuantity
+        public BasketRequestModel UpdateQuantity(string token,int productID,int quantity)
+        {
+
+            var customerId = _tokenService.GetCustomerIDClaim(token);
+
+            var basketId = GenerateHashedBasketId(customerId);
+            var existingBasket = _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+
+            if (existingBasket != null)
+            {
+                var itemToUpdate = existingBasket.Items.FirstOrDefault(i => i.ProductID == productID);
+
+                if (itemToUpdate != null)
                 {
-                    Product = product,
-                    Quantity = item.Quantity
-                });
-                basketResponse.TotalPrice += product.UnitPrice * item.Quantity;
-            }          
+                    itemToUpdate.Quantity = quantity;
+                    _redisService.SetData($"basket:{basketId}", existingBasket);
+                    return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+                }
+            }
 
-            return basketResponse;
+            return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
         }
+        #endregion
 
-        public void DeleteFromBasket(int basketID)
+        #region DeleteFromBasket
+        public BasketRequestModel DeleteFromBasket(string token,int productID)
         {
-            _redisService.Delete<BasketRequestModel>("basket");
-        }
 
-        public BasketResponseModel GetBasket(Guid basketID)
-        {
-            return  _redisService.GetData<BasketResponseModel>("basket");
-            
-        }
+            var customerId = _tokenService.GetCustomerIDClaim(token);
 
-        public void UpdateBasket(BasketRequestModel basketRequests)
+            var basketId = GenerateHashedBasketId(customerId);
+            var existingBasket = _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+
+            if (existingBasket != null)
+            {
+               
+                var itemToRemove = existingBasket.Items.FirstOrDefault(i => i.ProductID == productID);
+
+                if (itemToRemove != null)
+                {
+                   
+                    existingBasket.Items.Remove(itemToRemove);
+
+                    
+                    _redisService.SetData($"basket:{basketId}", existingBasket);
+                   
+                    return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+                }
+            }
+
+            return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+        }
+        #endregion
+
+        public async Task<BasketRequestModel> AddCampaign(string token, string campaignName)
         {   
-          
+         
+            var customerId = _tokenService.GetCustomerIDClaim(token);
+
+            var basketId = GenerateHashedBasketId(customerId);
+
+            var existingBasket = _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+            if (existingBasket == null)
+            {
+                return new BasketRequestModel();
+            }
+            var campaing = await _campaignService.FindCampaignAsync(campaignName);
+            if (campaing == null)
+            {
+                existingBasket.Discount = null;
+                _redisService.SetData($"basket:{basketId}", existingBasket);
+
+                return existingBasket;
+            }
+            existingBasket.Discount = new BasketDiscount
+            {
+                CampaignName = campaing.CampaignName,
+                DiscountAmount = campaing.DiscountAmount,
+                IsPercent = campaing.IsPercent
+            };
+
+            Console.WriteLine(existingBasket);
+
+            _redisService.SetData($"basket:{basketId}", existingBasket);
+
+            return existingBasket;
 
 
-
-            _redisService.Delete<BasketRequestModel>("basket");
-            _redisService.SetData("basket", basketRequests);
 
         }
+        private static string GenerateHashedBasketId(string customerId)
+        {
+            var bytes = Encoding.UTF8.GetBytes(customerId);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
+       
     }
 }
