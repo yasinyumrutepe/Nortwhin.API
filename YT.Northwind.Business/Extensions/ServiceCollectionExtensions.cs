@@ -26,6 +26,7 @@ namespace Northwind.Business.Extensions
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
             services.AddScoped<ICampaignService, CampaignService>();
+            services.AddScoped<IProductReviewService, ProductReviewService>();
             services.AddScoped<CustomAuthorizationFilter>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());

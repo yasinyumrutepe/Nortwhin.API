@@ -16,6 +16,13 @@ namespace Northwind.WebAPI.Controllers
             _campaignService = campaignService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var campaigns = await _campaignService.GetAllCampaignsAsync();
+            return Ok(campaigns);
+        }
+
 
         [HttpGet("{campaignName}")]
         public async Task<IActionResult>FindCampaing(string campaignName)
@@ -38,6 +45,12 @@ namespace Northwind.WebAPI.Controllers
             return Ok( await _campaignService.AddCampaignAsync(campaignRequest));
         }
 
+        [HttpPut]
+        [ServiceFilter(typeof(CustomAuthorizationFilter))]
+        public async Task<IActionResult> ChangeStatusCampaign([FromBody] ChangeStatusCampaignRequestModel changeStatusCampaign )
+        {
+            return Ok(await _campaignService.ChangeStatusCampaingAsync(changeStatusCampaign));
+        }
 
     }
 }

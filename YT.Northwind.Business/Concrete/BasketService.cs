@@ -174,6 +174,17 @@ namespace Northwind.Business.Concrete
 
 
         }
+
+
+        public int ClearBasket(string token)
+        {
+            var customerId = _tokenService.GetCustomerIDClaim(token);
+            var basketId = GenerateHashedBasketId(customerId);
+
+            _redisService.Delete<BasketRequestModel>($"basket:{basketId}");
+            return 1;
+        }
+
         private static string GenerateHashedBasketId(string customerId)
         {
             var bytes = Encoding.UTF8.GetBytes(customerId);

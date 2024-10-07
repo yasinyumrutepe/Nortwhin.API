@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +28,7 @@ namespace Northwind.Business.Filter
 
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
-                var userTypeID = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserTypeId");
+            var userTypeID = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
                 if (userTypeID == null || userTypeID.Value != "1")
                 {
                     context.Result = new UnauthorizedResult();

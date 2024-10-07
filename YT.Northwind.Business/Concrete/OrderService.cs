@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Request.Order;
@@ -7,6 +8,7 @@ using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Order;
 using Northwind.DataAccess.Repositories.Abstract;
 using Northwind.Entities.Concrete;
+using Stripe;
 
 namespace Northwind.Business.Concrete
 {
@@ -22,20 +24,28 @@ namespace Northwind.Business.Concrete
 
         public virtual async Task<PaginatedResponse<OrderResponseModel>> GetAllOrdersAsync(PaginatedRequest paginated)
         {
-           return _mapper.Map<PaginatedResponse<OrderResponseModel>>(await _orderRepository.GetAllAsync(
-             paginated, null, o => o.Employee,o=>o.Customer));
+            var orders = await _orderRepository.GetAllAsync2(paginated, 
+                  include: i => i
+          .Include(o => o.OrderDetails)
+              .ThenInclude(od => od.Product)
+                  .ThenInclude(p => p.ProductImages)
+          .Include(o => o.OrderDetails)
+              .ThenInclude(od => od.Product)
+                  .ThenInclude(p => p.ProductReviews)
+          .Include(o => o.OrderStatus));
+            return _mapper.Map<PaginatedResponse<OrderResponseModel>>(orders);
 
-           
+
 
         }
 
 
-        public async Task<OrderResponseModel> AddOrderAsync(string token)
+        public async Task<OrderResponseModel> AddOrderAsync(string token,OrderRequestModel orderRequest)
         {       
             var customerID = _tokenService.GetCustomerIDClaim(token);
             var basket = _basketService.GetBasket(token);
             var orderDetails = new List<OrderDetailRequestModel>();
-
+            var orderNumber = await GenerateOrderNumber();
             foreach (var item in basket.Items) {
                 var orderDetail = new OrderDetailRequestModel
                 {
@@ -46,23 +56,30 @@ namespace Northwind.Business.Concrete
                 };
                 orderDetails.Add(orderDetail);
             }
-            var order = new OrderRequestModel
-            {
-                OrderDate = DateTime.Now,
-                RequiredDate = DateTime.Now.AddDays(7),
-                ShippedDate = DateTime.Now.AddDays(1),
-                OrderDetails = orderDetails
-            };
-
             var orderEntity = _mapper.Map<Order>(new Order
             {
                 CustomerID = customerID,
-                OrderDate = order.OrderDate,
-                RequiredDate = order.RequiredDate,
-                ShippedDate = order.ShippedDate,
-                OrderDetails = _mapper.Map<ICollection<OrderDetail>>(order.OrderDetails)
+                OrderDate = orderRequest.OrderDate,
+                RequiredDate = orderRequest.RequiredDate,
+                ShippedDate = orderRequest.ShippedDate,
+                ShipAddress = orderRequest.ShipAddress,
+                ShipCity = orderRequest.ShipCity,
+                ShipCountry = orderRequest.ShipCountry,
+                ShipName = orderRequest.ShipName,
+                Freight = orderRequest.Freight,
+                OrderStatusID = 1,
+                OrderNumber = orderNumber,
+                TotalPrice = basket.TotalPrice,
+                OrderDetails = _mapper.Map<ICollection<OrderDetail>>(orderDetails)
             });
             var addedProduct = await _orderRepository.AddAsync(orderEntity);
+
+            if (addedProduct == null)
+            {
+                return null;
+            }
+
+            _basketService.ClearBasket(token);
             var responseDto = _mapper.Map<OrderResponseModel>(addedProduct);
 
             return responseDto;
@@ -92,9 +109,45 @@ namespace Northwind.Business.Concrete
         public async Task<PaginatedResponse<OrderResponseModel>> GetCustomerOrders(string token,PaginatedRequest paginatedRequest)
         {
             var customerID = _tokenService.GetCustomerIDClaim(token);
-            return _mapper.Map<PaginatedResponse<OrderResponseModel>>(await _orderRepository.GetAllAsync(
-               paginatedRequest,o=>o.CustomerID==customerID , o=>o.Employee,e=>e.Customer));
+            var orders = await _orderRepository.GetAllAsync2(paginatedRequest,predicate:c=>c.CustomerID ==customerID,
+                include: i => i
+        .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product)
+                .ThenInclude(p => p.ProductImages)
+        .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product)
+                .ThenInclude(p => p.ProductReviews.Where(pr=>pr.CustomerID==customerID))
+        .Include(o => o.OrderStatus));
+            return _mapper.Map<PaginatedResponse<OrderResponseModel>>(orders);
 
+        }
+
+
+        public async  Task<string> GenerateOrderNumber()
+        {
+            Random random = new();
+            int firstGroup = random.Next(100, 1000); 
+            int secondGroup = random.Next(100, 1000);
+            int thirdGroup = random.Next(100, 1000);
+            string orderNumber = $"{firstGroup}-{secondGroup}-{thirdGroup}";
+            var isOrder =  await _orderRepository.GetAsync(o=>o.OrderNumber == orderNumber);
+            if (isOrder != null)
+            {
+                return await GenerateOrderNumber();
+            }
+            return orderNumber;
+        }
+
+        public async Task<OrderResponseModel> ChangeOrderStatusAsync(ChangeOrderStatusRequestModel changeOrderStatusRequestModel)
+        {
+            var order = await _orderRepository.GetAsync(changeOrderStatusRequestModel.OrderID);
+            if (order == null)
+            {
+                return null;
+            }
+            order.OrderStatusID = changeOrderStatusRequestModel.OrderStatusID;
+            var updatedOrder = await _orderRepository.UpdateAsync(order);
+            return _mapper.Map<OrderResponseModel>(updatedOrder);
         }
     }
 }

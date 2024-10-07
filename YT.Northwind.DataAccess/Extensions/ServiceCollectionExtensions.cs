@@ -20,6 +20,7 @@ namespace Northwind.DataAccess.Extensions
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<ICampaignRepository, CampaignRepository>();
+            services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
 
 
 

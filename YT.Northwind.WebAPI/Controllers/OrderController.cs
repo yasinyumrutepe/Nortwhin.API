@@ -19,9 +19,14 @@ namespace Northwind.WebAPI.Controllers
         }
 
 
-        [HttpGet("customer/{token}")]
-        public async Task<IActionResult> GetCustomerOrders(string token, [FromQuery] PaginatedRequest paginatedRequest)
+        [HttpGet("customer")]
+        public async Task<IActionResult> GetCustomerOrders([FromQuery] PaginatedRequest paginatedRequest)
         {
+            var token = Request.Headers.Authorization.ToString();
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
             var orders = await _orderService.GetCustomerOrders(token, paginatedRequest);
             return Ok(orders);
         }
@@ -40,7 +45,7 @@ namespace Northwind.WebAPI.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> Add()
+        public async Task<IActionResult> Add([FromBody] OrderRequestModel orderRequest)
         {
             var token = Request.Headers.Authorization.ToString();
 
@@ -48,17 +53,18 @@ namespace Northwind.WebAPI.Controllers
             {
                 token = token["Bearer ".Length..].Trim();
             }
-            var addedOrder = await _orderService.AddOrderAsync(token);
+            var addedOrder = await _orderService.AddOrderAsync(token, orderRequest);
             return CreatedAtAction("Get", new { id = addedOrder.OrderID }, addedOrder);
         }
 
-        [HttpPut]
-
-        public async Task<IActionResult> Update([FromBody] OrderUpdateRequestModel order)
+        [HttpPut("status")]
+        public async Task<IActionResult> ChangeOrderStatus([FromBody] ChangeOrderStatusRequestModel changeOrderStatusRequest)
         {
-            var updatedOrder = await _orderService.UpdateOrderAsync(order);
+            var updatedOrder = await _orderService.ChangeOrderStatusAsync(changeOrderStatusRequest);
             return Ok(updatedOrder);
         }
+
+
 
         [HttpDelete("{id}")]
         public async Task<int> Delete(int id)

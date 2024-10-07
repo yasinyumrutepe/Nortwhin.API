@@ -14,4 +14,8 @@
     <ProjectReference Include="..\YT.Northwind.Entities\Northwind.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Response\Comment\" />
+  </ItemGroup>
+
 </Project>

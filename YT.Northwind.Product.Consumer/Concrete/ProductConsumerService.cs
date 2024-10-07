@@ -4,6 +4,7 @@ using Northwind.Product.Consumer.Abstract;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.ProductService;
+using Microsoft.EntityFrameworkCore;
 
 namespace Northwind.Product.Consumer.Concrete
 {
@@ -47,12 +48,12 @@ namespace Northwind.Product.Consumer.Concrete
         {   
 
          
-         return  await _productRepository.GetAllAsync(paginatedRequest, null,p=>p.ProductImages);
+         return  await _productRepository.GetAllAsync2(paginatedRequest, null,include:p=>p.Include(p=>p.ProductImages).Include(p=>p.ProductReviews));
         }
 
         public Task<Entities.Concrete.Product> GetProductAsync(int id)
         {
-           return _productRepository.GetAsync(p => p.ProductID == id,i=>i.ProductImages);
+           return _productRepository.GetAsync(p => p.ProductID == id,i=>i.ProductImages,i=>i.ProductReviews);
         }
 
         public async Task<Entities.Concrete.Product> UpdateProductAsync(UpdateProductConsumerRequest product)
