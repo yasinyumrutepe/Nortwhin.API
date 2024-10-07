@@ -13,6 +13,7 @@ namespace Northwind.Core.Models.Response.Product
         public decimal UnitPrice { get; set; }
         public string Description { get; set; } 
         public virtual ICollection<ProductImage> ProductImages { get; set; }
+        public virtual ICollection<Entities.Concrete.ProductReview> ProductReviews { get; set; }
 
 
     }

@@ -4,12 +4,8 @@ using Northwind.Entities.Concrete;
 
 namespace Northwind.DataAccess.Concrete.EntityFramework
 {
-    public  class NorthwindContext : DbContext
+    public  class NorthwindContext(DbContextOptions<NorthwindContext> options) : DbContext(options)
     {
-        public NorthwindContext(DbContextOptions<NorthwindContext> options) : base(options)
-        {
-            
-        }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Customer> Customers { get; set; }
@@ -22,6 +18,8 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
         public DbSet<User> Users { get; set; }
         public DbSet<UserType> UserTypes { get; set; }
         public DbSet<Campaign> Campaigns { get; set; }
+        public DbSet<OrderStatus> OrderStatuses { get; set; }
+        public DbSet<ProductReview> ProductReviews { get; set; }
 
 
 

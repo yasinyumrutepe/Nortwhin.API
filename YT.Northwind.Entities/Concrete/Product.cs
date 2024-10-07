@@ -15,6 +15,7 @@ namespace Northwind.Entities.Concrete
         [JsonIgnore]
         public virtual Supplier Supplier { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }
+        public virtual ICollection<ProductReview> ProductReviews { get; set; }
 
     }
 }

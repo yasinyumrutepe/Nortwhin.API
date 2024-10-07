@@ -12,6 +12,8 @@ namespace Northwind.Business.Abstract
 
         public BasketRequestModel DeleteFromBasket(string token,int productID);
 
+        public int ClearBasket(string token);
+
         public BasketRequestModel UpdateQuantity(string token, int productID, int quantity);
 
         public Task<BasketRequestModel> AddCampaign(string token, string campaignName);

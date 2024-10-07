@@ -5,7 +5,6 @@ using Northwind.Core.Models.Response.Campaign;
 using Northwind.DataAccess.Repositories.Abstract;
 using Northwind.Entities.Concrete;
 
-
 namespace Northwind.Business.Concrete
 {
     public class CampaignService : ICampaignService
@@ -17,6 +16,11 @@ namespace Northwind.Business.Concrete
         {
             _campaignRepository = campaignRepository;
             _mapper = mapper;
+        }
+        public async Task<List<CampaignResponseModel>> GetAllCampaignsAsync()
+        {
+            var campaigns = await _campaignRepository.GetAllAsync();
+            return _mapper.Map<List<CampaignResponseModel>>(campaigns);
         }
 
         public async Task<CampaignResponseModel> FindCampaignAsync(string campaignName)
@@ -31,6 +35,18 @@ namespace Northwind.Business.Concrete
             var campaign = _mapper.Map<Campaign>(campaignRequestModel);
             var addedCampaign = await _campaignRepository.AddAsync(campaign);
             return _mapper.Map<CampaignResponseModel>(addedCampaign);
+        }
+
+        public async Task<CampaignResponseModel> ChangeStatusCampaingAsync(ChangeStatusCampaignRequestModel changeStatusCampaignRequestModel)
+        {
+            var campaign = await _campaignRepository.GetAsync(changeStatusCampaignRequestModel.CampaignID) ;
+            if (campaign == null)
+            {
+                throw new Exception("Campaign not found");
+            }
+            campaign.IsActive = changeStatusCampaignRequestModel.IsActive;
+            var updatedCampaign = await _campaignRepository.UpdateAsync(campaign);
+            return _mapper.Map<CampaignResponseModel>(updatedCampaign);
         }
     }
 }

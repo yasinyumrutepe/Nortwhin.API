@@ -5,6 +5,7 @@ using Northwind.Core.Models.Request.Customer;
 using Northwind.Core.Models.Request.Employee;
 using Northwind.Core.Models.Request.Order;
 using Northwind.Core.Models.Request.Product;
+using Northwind.Core.Models.Request.ProductReview;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Auth;
 using Northwind.Core.Models.Response.Campaign;
@@ -13,6 +14,7 @@ using Northwind.Core.Models.Response.Customer;
 using Northwind.Core.Models.Response.Employee;
 using Northwind.Core.Models.Response.Order;
 using Northwind.Core.Models.Response.Product;
+using Northwind.Core.Models.Response.ProductReview;
 using Northwind.Entities.Concrete;
 
 namespace Northwind.Business.Mapper
@@ -65,6 +67,10 @@ namespace Northwind.Business.Mapper
            CreateMap<CampaignRequestModel, Campaign>();
             CreateMap<Campaign, CampaignResponseModel>();
 
+
+            //ProductReviewRequestModel to ProductReview
+            CreateMap<ProductReviewRequestModel, ProductReview>();
+            CreateMap<ProductReview, ProductReviewResponseModel>();
 
 
 

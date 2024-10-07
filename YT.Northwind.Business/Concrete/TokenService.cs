@@ -23,7 +23,7 @@ namespace Northwind.Business.Concrete
                      new(ClaimTypes.NameIdentifier, user.UserID.ToString()),
                      new(ClaimTypes.Email, user.Email),
                      new(JwtRegisteredClaimNames.Sub,user.CustomerID),
-                     new("UserTypeID", user.UserTypeID.ToString())
+                     new(ClaimTypes.Role,user.UserTypeID.ToString())
 
 
                 }),
