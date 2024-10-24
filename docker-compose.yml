@@ -2,17 +2,17 @@ services:
   backend:
     container_name: "backend"
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: .  # Backend Dockerfile'ının bulunduğu dizin
+      dockerfile: ./Dockerfile  # Dockerfile yolu
     ports:
-      - "5142:8080"  
+      - "5142:8080"  # Backend portu
     depends_on:
-      - sqlserver 
-      - rabbitmq
-      - redis
+      - sqlserver  # SQL Server'a bağlı
+      - rabbitmq   # RabbitMQ'ya bağlı
+      - redis       # Redis'e bağlı
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__Data Source=localhost,1433;Initial Catalog=northwind;User ID=sa;Password=Yy654321**;TrustServerCertificate=True;  
+      - ConnectionStrings__Data Source=localhost,1433;Initial Catalog=northwind;User ID=sa;Password=Yy654321**;TrustServerCertificate=True
     networks:
       - mynetwork
 
