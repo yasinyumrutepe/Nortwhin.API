@@ -21,12 +21,9 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<CreateProductConsumer>();
     x.AddConsumer<DeleteProductConsumer>();
     x.AddConsumer<UpdateProductConsumer>();
-    x.AddConsumer<GetProductConsumer>();
-    x.AddConsumer<GetAllProductConsumer>();
-    x.AddConsumer<GetProductsByCategoryConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host("rabbitmq", h =>
         {
             h.Username("guest");
             h.Password("guest");
@@ -47,30 +44,9 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<UpdateProductConsumer>(context);
         });
 
-        cfg.ReceiveEndpoint("get-product-queue", e =>
-        {
-            e.ConfigureConsumer<GetProductConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("get-all-product-queue", e =>
-        {
-            e.ConfigureConsumer<GetAllProductConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("get-products-by-category-queue", e =>
-        {
-            e.ConfigureConsumer<GetProductsByCategoryConsumer>(context);
-        });
-
         EndpointConvention.Map<CreateProductConsumerModel>(new Uri("queue:create-product-queue"));
         EndpointConvention.Map<DeleteProductConsumerModel>(new Uri("queue:delete-product-queue"));
         EndpointConvention.Map<UpdateProductConsumerModel>(new Uri("queue:update-product-queue"));
-        EndpointConvention.Map<GetProductConsumerModel>(new Uri("queue:get-product-queue"));
-        EndpointConvention.Map<GetAllProductConsumerModel>(new Uri("queue:get-all-product-queue"));
-        EndpointConvention.Map<GetProductsByCategoryConsumerModel>(new Uri("queue:get-products-by-category-queue"));
-
-
-
     });
 });
 
@@ -114,28 +90,40 @@ StripeConfiguration.ApiKey = "sk_test_51OtaEARoV1dehEh0g9XquCA7DPSBEy10BEE70kmoN
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy(name: "AllowAllOrigins",
+         configurePolicy: policy =>
+         {
+             policy.AllowAnyOrigin()
+                 .AllowAnyHeader()
+                 .AllowAnyMethod();
+         });
+    options.AddPolicy(name: "AllowOnlySomeOrigins",
+        configurePolicy: policy =>
+        {   
+            policy.WithOrigins("http://localhost:3000/",
+                "https://localhost:3000/",
+                "http://front.localhost:3000/",
+                "https://front.locahost:3000"
+                );
+        });
 });
+
+Console.WriteLine("Hello World!");
 
 
 var app = builder.Build();
 
 
-
+app.UseSwagger();
+app.UseSwaggerUI();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+   
 }
-app.UseCors("AllowAll");
+app.UseCors("AllowAllOrigins");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

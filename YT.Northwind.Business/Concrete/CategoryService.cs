@@ -1,6 +1,7 @@
 ﻿
 
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Request.Category;
@@ -18,13 +19,15 @@ namespace Northwind.Business.Concrete
 
         public async Task<PaginatedResponse<CategoryResponseModel>> GetAllCategoriesAsync(PaginatedRequest paginated)
         {   
-           return _mapper.Map<PaginatedResponse<CategoryResponseModel>>(await _categoryRepository.GetAllAsync(paginated,null,c=>c.Products));
-
+           return _mapper.Map<PaginatedResponse<CategoryResponseModel>>(await _categoryRepository.GetAllAsync2(paginated,include:c=>c.Include(x=>x.Products)));
           
         }
         public async Task<CategoryResponseModel> GetCategoryAsync(int id)
         {
-            return  _mapper.Map<CategoryResponseModel>(await _categoryRepository.GetAsync(c=>c.CategoryID==id,c=>c.Products));
+
+
+            var category = await _categoryRepository.GetAsync(filter: c => c.CategoryID == id,include:p=>p.Include(p=>p.Products));
+            return  _mapper.Map<CategoryResponseModel>(category);
         }
         public async Task<CategoryResponseModel> AddCategoryAsync(CategoryRequestModel category)
         {
@@ -41,8 +44,10 @@ namespace Northwind.Business.Concrete
         }
 
         public async Task<int> DeleteCategoryAsync(int id)
-        {
-           return await _categoryRepository.DeleteAsync(id);
+        {   
+           var category = await _categoryRepository.GetAsync(filter: c => c.CategoryID == id);
+            var isDeleted = await _categoryRepository.DeleteAsync(category);
+           return isDeleted;
         }
     }
 }

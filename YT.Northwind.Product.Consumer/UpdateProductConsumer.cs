@@ -19,9 +19,9 @@ namespace Northwind.Product.Consumer
                 ProductID = product.ProductID,
                 ProductName = product.ProductName,
                 CategoryID = product.CategoryID,
-                QuantityPerUnit = product.QuantityPerUnit,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
+                UnitsInStock = product.UnitsInStock,
             });
 
           await context.RespondAsync(updatedProduct);

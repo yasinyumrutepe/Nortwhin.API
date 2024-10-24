@@ -11,6 +11,7 @@ namespace Northwind.Product.Consumer.Concrete
     public class ProductConsumerService(IProductRepository productRepository) : IProductConsumerService
     {
         private readonly IProductRepository _productRepository = productRepository;
+        
 
         public async Task<Entities.Concrete.Product> AddProductAsync(AddProductConsumerRequest product)
         {   
@@ -30,7 +31,6 @@ namespace Northwind.Product.Consumer.Concrete
             {
                 ProductName = product.ProductName,
                 CategoryID = product.CategoryID,
-                QuantityPerUnit = product.QuantityPerUnit,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
                 ProductImages = productImages
@@ -44,17 +44,9 @@ namespace Northwind.Product.Consumer.Concrete
         }
 
        
-        public async Task<PaginatedResponse<Entities.Concrete.Product>> GetAllProductAsync(PaginatedRequest paginatedRequest)
-        {   
+       
 
-         
-         return  await _productRepository.GetAllAsync2(paginatedRequest, null,include:p=>p.Include(p=>p.ProductImages).Include(p=>p.ProductReviews));
-        }
-
-        public Task<Entities.Concrete.Product> GetProductAsync(int id)
-        {
-           return _productRepository.GetAsync(p => p.ProductID == id,i=>i.ProductImages,i=>i.ProductReviews);
-        }
+      
 
         public async Task<Entities.Concrete.Product> UpdateProductAsync(UpdateProductConsumerRequest product)
         {
@@ -63,10 +55,10 @@ namespace Northwind.Product.Consumer.Concrete
                 ProductID = product.ProductID,
                 ProductName = product.ProductName,
                 CategoryID = product.CategoryID,
-                QuantityPerUnit = product.QuantityPerUnit,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
-            });
+                UnitsInStock = product.UnitsInStock
+         });
 
             return updatedProduct;
 
@@ -74,22 +66,14 @@ namespace Northwind.Product.Consumer.Concrete
 
         public async Task<DeleteProductConsumerResponseModel> DeleteProductAsync(int id)
         {
-         var isDeleted = await _productRepository.DeleteAsync(id);
+            var product = await _productRepository.GetAsync(p => p.ProductID == id);
+            var isDeleted = await _productRepository.DeleteAsync(product);
             return new DeleteProductConsumerResponseModel
             {
                 IsDeleted = isDeleted
             };
         }
 
-        public async Task<PaginatedResponse<Entities.Concrete.Product>> GetProductsByCategoryAsync(CategoryProductsConsumerRequest categoryProductsRequest)
-        {
-            var paginatedRequest = new PaginatedRequest
-            {
-                Limit = categoryProductsRequest.Limit,
-                Page = categoryProductsRequest.Page
-            };
-
-           return  await _productRepository.GetAllAsync(paginatedRequest, p=>p.CategoryID == categoryProductsRequest.CategoryID, i => i.ProductImages);
-        }
+       
     }
 }

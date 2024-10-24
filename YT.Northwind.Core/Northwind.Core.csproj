@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Request\Variant\" />
     <Folder Include="Models\Response\Comment\" />
   </ItemGroup>
 

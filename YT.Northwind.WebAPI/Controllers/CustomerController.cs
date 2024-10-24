@@ -19,7 +19,7 @@ namespace Northwind.WebAPI.Controllers
         }
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(string id)
         {
             var customer = await _customerService.GetCustomerAsync(id);
             if (customer == null)
@@ -56,7 +56,7 @@ namespace Northwind.WebAPI.Controllers
         }
         [HttpDelete]
 
-        public async Task<int> Delete(int id)
+        public async Task<int> Delete(string id)
         {
             return await _customerService.DeleteCustomerAsync(id);
             

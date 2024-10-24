@@ -12,7 +12,7 @@ namespace
         {
             get
             {
-                if (Discount == null) // Discount yoksa indirim uygulamadan hesaplar
+                if (Discount == null) 
                    return Items.Sum(item => item.TotalPrice);
 
                 return Discount.IsPercent
@@ -34,6 +34,8 @@ namespace
         public string CategoryName { get; set; } 
         public decimal UnitPrice { get; set; } 
         public int Quantity { get; set; }
+
+
         public decimal TotalPrice => UnitPrice * Quantity;
         public List<Entities.Concrete.ProductImage> Images { get; set; } 
       

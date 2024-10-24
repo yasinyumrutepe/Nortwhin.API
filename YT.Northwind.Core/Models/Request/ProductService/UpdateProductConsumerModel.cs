@@ -11,5 +11,6 @@ namespace Northwind.Core.Models.Request.ProductService
         public string QuantityPerUnit { get; set; }
         public decimal UnitPrice { get; set; }
         public string Description { get; set; }
+        public short UnitsInStock { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Northwind.Core.Models.Request.Order
+﻿using Northwind.Entities.Concrete;
+
+namespace Northwind.Core.Models.Request.Order
 {
     public class OrderRequestModel
     {

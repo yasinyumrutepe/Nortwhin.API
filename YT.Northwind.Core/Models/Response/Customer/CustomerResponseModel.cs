@@ -1,6 +1,8 @@
 ﻿using 
     Northwind.Core.Models.Response.Auth;
 using Northwind.Core.Models.Response.Order;
+using Northwind.Core.Models.Response.ProductFavorite;
+using Northwind.Entities.Concrete;
 
 namespace Northwind.Core.Models.Response.Customer
 {
@@ -19,6 +21,7 @@ namespace Northwind.Core.Models.Response.Customer
         public string Phone { get; set; }
         public string Fax { get; set; }
         public ICollection<OrderResponseModel> Orders { get; set; }
+        public ICollection<ProductFavoriteResponseModel>  ProductFavorites { get; set; }
         public UserResponseModel User { get; set; }
     }
 }

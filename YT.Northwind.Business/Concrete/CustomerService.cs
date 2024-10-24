@@ -1,6 +1,7 @@
 ﻿
 
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using 
     Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
@@ -28,7 +29,7 @@ namespace Northwind.Business.Concrete
 
         public async Task<CustomerResponseModel> GetCustomerByTokenAsync(string token)
         {   var customerID = _tokenService.GetCustomerIDClaim(token);
-            return _mapper.Map<CustomerResponseModel>(await _customerRepository.GetAsync(c=>c.CustomerID == customerID,c=>c.User));
+            return _mapper.Map<CustomerResponseModel>(await _customerRepository.GetAsync(c=>c.CustomerID == customerID,include:c=>c.Include(c=>c.User)));
         }
         public async Task<CustomerResponseModel> AddCustomerAsync(CustomerRequestModel customer)
         {
@@ -44,18 +45,19 @@ namespace Northwind.Business.Concrete
 
        
 
-        public async Task<CustomerResponseModel> GetCustomerAsync(int id)
+        public async Task<CustomerResponseModel> GetCustomerAsync(string id)
         {  
-           return  _mapper.Map<CustomerResponseModel>(await _customerRepository.GetAsync(id));
+           return  _mapper.Map<CustomerResponseModel>(await _customerRepository.GetAsync(filter:c=>c.CustomerID == id));
         }
 
         public async Task<CustomerResponseModel> UpdateCustomerAsync(CustomerUpdateRequestModel customer)
         {  var updatedCustomer = _mapper.Map<Customer>(customer);
             return  _mapper.Map<CustomerResponseModel>(await _customerRepository.UpdateAsync(updatedCustomer));
         }
-        public async Task<int> DeleteCustomerAsync(int id)
+        public async Task<int> DeleteCustomerAsync(string id)
         {
-          return  await _customerRepository.DeleteAsync(id);
+            var customer = await _customerRepository.GetAsync(filter: c => c.CustomerID == id);
+            return  await _customerRepository.DeleteAsync(customer);
         }
 
        

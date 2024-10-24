@@ -9,11 +9,11 @@ namespace Northwind.Business.Abstract
 {
     public interface IProductService
     {
-        Task<PaginatedResponse<ProductResponseModel>> GetAllProductAsync(PaginatedRequest paginatedRequest);
+        Task<PaginatedResponse<ProductResponseModel>> GetAllProductAsync(AllProductRequestModel productFilter,string customerID);
 
-        Task<ProductResponseModel> GetProductAsync(int id);
+        Task<ProductResponseModel> GetProductAsync(int id, string customerID);
 
-        Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest);
+        Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest,string token);
         Task<string> AddProductAsync(ProductRequestModel product);
         Task<ProductResponseModel> UpdateProductAsync(ProductUpdateRequestModel product);
         Task<int> DeleteProductAsync(int id);

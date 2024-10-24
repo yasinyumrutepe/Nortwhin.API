@@ -27,6 +27,9 @@ namespace Northwind.Business.Extensions
             services.AddScoped<IProductImageService, ProductImageService>();
             services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IProductReviewService, ProductReviewService>();
+            services.AddScoped<IProductFavoriteService, ProductFavoriteService>();
+            services.AddScoped<IVariantService, VariantService>();
+
             services.AddScoped<CustomAuthorizationFilter>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());

@@ -13,7 +13,7 @@ namespace Northwind.DataAccess.Repositories.Concrete
     {
         public async Task<User> LoginAsync(LoginRequestModel loginRequest)
         {
-            var user = await GetAsync(u => u.Email == loginRequest.Email);
+            var user = await GetAsync(filter:u => u.Email == loginRequest.Email);
             if (user == null)
             {
                 return null; 

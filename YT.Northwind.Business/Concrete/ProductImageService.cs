@@ -10,8 +10,8 @@ namespace Northwind.Business.Concrete
 {
     public class ProductImageService: IProductImageService
     {
-        private IProductImageRepository _productImageRepository;
-        private ICloudinaryService _cloudinaryService;
+        private readonly IProductImageRepository _productImageRepository;
+        private readonly ICloudinaryService _cloudinaryService;
         public ProductImageService(IProductImageRepository productImageRepository, ICloudinaryService cloudinaryService)
         {
             _productImageRepository = productImageRepository;
@@ -20,9 +20,9 @@ namespace Northwind.Business.Concrete
 
         public async Task<int> DeleteProductImageAsync(int productImageID)
         {   
-            var productImage = await _productImageRepository.GetAsync(productImageID);
+            var productImage = await _productImageRepository.GetAsync(filter:p=>p.ProductImageID==productImageID);
             if (productImage == null) return 0;
-            var  isDelete = await _productImageRepository.DeleteAsync(productImageID);
+            var  isDelete = await  _productImageRepository.DeleteAsync(productImage);
             if (isDelete == 0) return 0;
 
             var isImageDelete = await _cloudinaryService.DeleteImageAsync(productImage.ImagePublicID);
