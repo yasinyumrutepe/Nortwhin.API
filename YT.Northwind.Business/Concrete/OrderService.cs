@@ -7,17 +7,19 @@ using Northwind.Core.Models.Request.Order;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Order;
 using Northwind.DataAccess.Repositories.Abstract;
+using Northwind.DataAccess.Repositories.Concrete;
 using Northwind.Entities.Concrete;
 using Stripe;
 
 namespace Northwind.Business.Concrete
 {
-    public class OrderService(IOrderRepository orderRepository,IMapper mapper,ITokenService tokenService,IBasketService basketService) : IOrderService
+    public class OrderService(IOrderRepository orderRepository,IOrderStatusRepository orderStatusRepository,IMapper mapper,ITokenService tokenService,IBasketService basketService) : IOrderService
     { 
         private readonly IOrderRepository _orderRepository = orderRepository;
         private readonly IMapper _mapper = mapper;
         private readonly ITokenService _tokenService = tokenService;
         private readonly IBasketService _basketService = basketService;
+        private readonly IOrderStatusRepository _orderStatusRepository = orderStatusRepository;
 
 
 
@@ -32,11 +34,8 @@ namespace Northwind.Business.Concrete
           .Include(o => o.OrderDetails)
               .ThenInclude(od => od.Product)
                   .ThenInclude(p => p.ProductReviews)
-          .Include(o => o.OrderStatus));
+          .Include(o => o.OrderStatuses).ThenInclude(o=>o.Status));
             return _mapper.Map<PaginatedResponse<OrderResponseModel>>(orders);
-
-
-
         }
 
 
@@ -60,17 +59,15 @@ namespace Northwind.Business.Concrete
             {
                 CustomerID = customerID,
                 OrderDate = orderRequest.OrderDate,
-                RequiredDate = orderRequest.RequiredDate,
-                ShippedDate = orderRequest.ShippedDate,
                 ShipAddress = orderRequest.ShipAddress,
                 ShipCity = orderRequest.ShipCity,
                 ShipCountry = orderRequest.ShipCountry,
                 ShipName = orderRequest.ShipName,
                 Freight = orderRequest.Freight,
-                OrderStatusID = 1,
                 OrderNumber = orderNumber,
                 TotalPrice = basket.TotalPrice,
-                OrderDetails = _mapper.Map<ICollection<OrderDetail>>(orderDetails)
+                OrderDetails = _mapper.Map<ICollection<OrderDetail>>(orderDetails),
+                OrderStatuses = [new OrderStatus { StatusID = 1, CreatedAt = DateTime.Now }]
             });
             var addedProduct = await _orderRepository.AddAsync(orderEntity);
 
@@ -91,7 +88,7 @@ namespace Northwind.Business.Concrete
 
         public async Task<OrderResponseModel> GetOrderAsync(int id)
         {
-            return _mapper.Map<OrderResponseModel>(await _orderRepository.GetAsync(id));
+            return _mapper.Map<OrderResponseModel>(await _orderRepository.GetAsync(filter:o=>o.OrderID==id));
 
             
         }
@@ -103,7 +100,8 @@ namespace Northwind.Business.Concrete
 
         public async Task<int> DeleteOrderAsync(int id)
         {
-            return await _orderRepository.DeleteAsync(id);
+            var order = await _orderRepository.GetAsync(filter: o => o.OrderID == id);
+            return await _orderRepository.DeleteAsync(order);
         }
 
         public async Task<PaginatedResponse<OrderResponseModel>> GetCustomerOrders(string token,PaginatedRequest paginatedRequest)
@@ -117,7 +115,7 @@ namespace Northwind.Business.Concrete
         .Include(o => o.OrderDetails)
             .ThenInclude(od => od.Product)
                 .ThenInclude(p => p.ProductReviews.Where(pr=>pr.CustomerID==customerID))
-        .Include(o => o.OrderStatus));
+        .Include(o => o.OrderStatuses).ThenInclude(o => o.Status));
             return _mapper.Map<PaginatedResponse<OrderResponseModel>>(orders);
 
         }
@@ -140,14 +138,21 @@ namespace Northwind.Business.Concrete
 
         public async Task<OrderResponseModel> ChangeOrderStatusAsync(ChangeOrderStatusRequestModel changeOrderStatusRequestModel)
         {
-            var order = await _orderRepository.GetAsync(changeOrderStatusRequestModel.OrderID);
-            if (order == null)
+            
+            var orderStatus = new OrderStatus
+            {
+                OrderID = changeOrderStatusRequestModel.OrderID,
+                StatusID = changeOrderStatusRequestModel.StatusID,
+                CreatedAt = DateTime.Now
+            };
+           var isAdded =  await _orderStatusRepository.AddAsync(orderStatus);
+            if (isAdded == null)
             {
                 return null;
             }
-            order.OrderStatusID = changeOrderStatusRequestModel.OrderStatusID;
-            var updatedOrder = await _orderRepository.UpdateAsync(order);
-            return _mapper.Map<OrderResponseModel>(updatedOrder);
+            var order = await _orderRepository.GetAsync(filter: o => o.OrderID == changeOrderStatusRequestModel.OrderID);
+            return _mapper.Map<OrderResponseModel>(order);
+
         }
     }
 }

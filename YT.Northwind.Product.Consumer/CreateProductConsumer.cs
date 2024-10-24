@@ -19,7 +19,6 @@ namespace Northwind.Product.Consumer
                 {
                     ProductName = newProduct.ProductName,
                     CategoryID = newProduct.CategoryID,
-                    QuantityPerUnit = newProduct.QuantityPerUnit,
                     UnitPrice = newProduct.UnitPrice,
                     Description = newProduct.Description,
                     ProductImages = newProduct.Images

@@ -1,0 +1,62 @@
+services:
+  backend:
+    container_name: "backend"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "5142:8080"  
+    depends_on:
+      - sqlserver 
+      - rabbitmq
+      - redis
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Data Source=localhost,1433;Initial Catalog=northwind;User ID=sa;Password=Yy654321**;TrustServerCertificate=True;  
+    networks:
+      - mynetwork
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      SA_PASSWORD: "Yy654321**"  # Güçlü bir parola
+      ACCEPT_EULA: "Y"  # EULA kabulü
+    ports:
+      - "1433:1433"  # SQL Server portu
+    networks:
+      - mynetwork
+
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"  # Nginx servisi dışarıya 80 portu üzerinden açılıyor
+    volumes:
+     - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Nginx konfigürasyon dosyasını mount ediyoruz
+    links:
+      - backend  # Backend ile bağlantılı
+    networks:
+      - mynetwork
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: "rabbitmq"
+    ports:
+      - "5672:5672"  # RabbitMQ messaging portu
+      - "15672:15672"  # RabbitMQ yönetim paneli portu
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"  # Redis default portu
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

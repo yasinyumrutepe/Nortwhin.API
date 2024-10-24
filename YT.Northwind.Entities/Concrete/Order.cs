@@ -5,12 +5,9 @@ namespace Northwind.Entities.Concrete
     {
         public int OrderID { get; set; }
         public string CustomerID { get; set; }
-        public int? OrderStatusID { get; set; } // Nullable
         public string OrderNumber { get; set; }
-        public DateTime? OrderDate { get; set; } // Nullable
-        public DateTime? RequiredDate { get; set; } // Nullable
-        public DateTime? ShippedDate { get; set; } // Nullable
-        public decimal? Freight { get; set; } // Nullable
+        public DateTime? OrderDate { get; set; }
+        public decimal? Freight { get; set; } 
         public string ShipName { get; set; }
         public string ShipCity { get; set; }
         public string ShipCountry { get; set; }
@@ -18,7 +15,7 @@ namespace Northwind.Entities.Concrete
         public decimal TotalPrice { get; set; }
         public virtual Customer Customer { get; set; }
         public ICollection<OrderDetail> OrderDetails { get; set; }
-        public virtual OrderStatus OrderStatus { get; set; }
+        public ICollection<OrderStatus> OrderStatuses { get; set; }
 
 
     }

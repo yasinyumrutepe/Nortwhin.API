@@ -13,7 +13,6 @@ namespace Northwind.DataAccess.Concrete.EntityFramework.Mappings
             builder.Property(x => x.ProductID).HasColumnName("ProductID");
             builder.Property(x => x.ProductName).HasColumnName("ProductName");
             builder.Property(x => x.CategoryID).HasColumnName("CategoryID");
-            builder.Property(x => x.QuantityPerUnit).HasColumnName("QuantityPerUnit");
             builder.Property(x => x.UnitPrice).HasColumnName("UnitPrice");
 
         }

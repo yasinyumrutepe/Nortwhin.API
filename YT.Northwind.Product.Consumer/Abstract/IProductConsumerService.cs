@@ -7,9 +7,6 @@ namespace Northwind.Product.Consumer.Abstract
 {
     public interface IProductConsumerService
     {
-        Task<PaginatedResponse<Entities.Concrete.Product>> GetAllProductAsync(PaginatedRequest paginatedRequest);
-        Task<Entities.Concrete.Product> GetProductAsync(int id);
-        Task<PaginatedResponse<Entities.Concrete.Product>> GetProductsByCategoryAsync(CategoryProductsConsumerRequest categoryProductsRequest);
         Task<Entities.Concrete.Product> AddProductAsync(AddProductConsumerRequest product);
         Task<Entities.Concrete.Product> UpdateProductAsync(UpdateProductConsumerRequest product);
         Task<DeleteProductConsumerResponseModel> DeleteProductAsync(int id);

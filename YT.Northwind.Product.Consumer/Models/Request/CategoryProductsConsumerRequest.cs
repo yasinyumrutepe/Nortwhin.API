@@ -7,5 +7,8 @@ namespace Northwind.Product.Consumer.Models.Request
         public int CategoryID { get; set; }
         public int Page { get; set; }
         public int Limit { get; set; }
+        public string CustomerID { get; set; }
+
+
     }
 }

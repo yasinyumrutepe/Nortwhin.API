@@ -18,8 +18,14 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
         public DbSet<User> Users { get; set; }
         public DbSet<UserType> UserTypes { get; set; }
         public DbSet<Campaign> Campaigns { get; set; }
+        public DbSet<Status> Statuses { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
+        public DbSet<ProductFavorite> ProductFavorites { get; set; }
+        public DbSet<Variant> Variants { get; set; }
+
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+
 
 
 
@@ -31,7 +37,19 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
 
             modelBuilder.Entity<OrderDetail>().HasKey(x => new { x.OrderID, x.ProductID });
             modelBuilder.Entity<Product>().HasOne(x => x.Category).WithMany(x => x.Products).HasForeignKey(x => x.CategoryID);
+            modelBuilder.Entity<ProductFavorite>().HasKey(x => x.ProductFavoriteID);
+            modelBuilder.Entity<OrderStatus>()
+           .HasKey(os => new { os.OrderStatusID }); 
 
+            modelBuilder.Entity<OrderStatus>()
+                .HasOne(os => os.Order)
+                .WithMany(o => o.OrderStatuses)
+                .HasForeignKey(os => os.OrderID);
+
+            modelBuilder.Entity<OrderStatus>()
+                .HasOne(os => os.Status)
+                .WithMany(s => s.OrderStatuses)
+                .HasForeignKey(os => os.StatusID);
 
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

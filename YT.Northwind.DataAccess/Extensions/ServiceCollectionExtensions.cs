@@ -10,7 +10,7 @@ namespace Northwind.DataAccess.Extensions
     {
         public static void AddDataAccessRegisration(this IServiceCollection services)
         {
-            services.AddDbContext<NorthwindContext>(options => options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=northwind;Integrated Security=True",sqlOptions => sqlOptions.CommandTimeout(180)));
+            services.AddDbContext<NorthwindContext>(options => options.UseSqlServer("Data Source=localhost,1433;Initial Catalog=northwind;User ID=sa;Password=Yy654321**;TrustServerCertificate=True;", sqlOptions => sqlOptions.CommandTimeout(180)));
 
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -21,6 +21,9 @@ namespace Northwind.DataAccess.Extensions
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<ICampaignRepository, CampaignRepository>();
             services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+            services.AddScoped<IProductFavoriteRepository, ProductFavoriteRepository>();
+            services.AddScoped<IVariantRepository, VariantRepository>();
+            services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
 
 
 

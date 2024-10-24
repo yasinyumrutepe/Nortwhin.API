@@ -77,8 +77,8 @@ namespace Northwind.Business.Concrete
             var customerId = _tokenService.GetCustomerIDClaim(token);
 
             var basketId = GenerateHashedBasketId(customerId);
-
-            return _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+            var basket = _redisService.GetData<BasketRequestModel>($"basket:{basketId}");
+            return basket;
 
         }
         #endregion

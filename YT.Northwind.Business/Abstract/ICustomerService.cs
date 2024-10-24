@@ -11,11 +11,11 @@ namespace Northwind.Business.Abstract
     {
 
         Task<PaginatedResponse<CustomerResponseModel>> GetAllCustomersAsync(PaginatedRequest paginated);
-        Task<CustomerResponseModel> GetCustomerAsync(int id);
+        Task<CustomerResponseModel> GetCustomerAsync(string id);
         Task<CustomerResponseModel> GetCustomerByTokenAsync(string token);
         Task<CustomerResponseModel> AddCustomerAsync(CustomerRequestModel customer);
         Task<CustomerResponseModel> UpdateCustomerAsync(CustomerUpdateRequestModel customer);
-        Task<int> DeleteCustomerAsync(int id);
+        Task<int> DeleteCustomerAsync(string id);
        
 
     }

@@ -40,7 +40,8 @@ namespace Northwind.Business.Concrete
 
         public async Task<int> DeleteEmployeeAsync(int id)
         {
-          return  await _employeeRepository.DeleteAsync(id);
+            var employee = await _employeeRepository.GetAsync(filter: e => e.EmployeeID == id);
+            return await  _employeeRepository.DeleteAsync(employee);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Northwind.Business.Concrete
 
         public async Task<CampaignResponseModel> ChangeStatusCampaingAsync(ChangeStatusCampaignRequestModel changeStatusCampaignRequestModel)
         {
-            var campaign = await _campaignRepository.GetAsync(changeStatusCampaignRequestModel.CampaignID) ;
+            var campaign = await _campaignRepository.GetAsync(filter:u=>u.CampaignID == changeStatusCampaignRequestModel.CampaignID) ;
             if (campaign == null)
             {
                 throw new Exception("Campaign not found");

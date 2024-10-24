@@ -18,7 +18,7 @@ namespace Northwind.Core.Models.Request.Order
         public string ShipAddress { get; set; }
         public decimal TotalPrice { get; set; }
         public ICollection<OrderDetail> OrderDetails { get; set; }
-        public virtual OrderStatus OrderStatus { get; set; }
+        public virtual Status OrderStatus { get; set; }
 
     }
 }

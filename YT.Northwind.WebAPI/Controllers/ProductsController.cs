@@ -16,9 +16,16 @@ namespace Northwind.WebAPI.Controllers
         private readonly IProductService _productService = productService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PaginatedRequest paginatedRequest )
+        public async Task<IActionResult> GetAll([FromQuery] AllProductRequestModel productfilter )
         {
-            var products = await _productService.GetAllProductAsync(paginatedRequest);
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+
+            var products = await _productService.GetAllProductAsync(productfilter, token);
 
 
             return Ok(products);
@@ -26,7 +33,13 @@ namespace Northwind.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var product = await _productService.GetProductAsync(id);
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+            var product = await _productService.GetProductAsync(id, token);
             if (product == null)
             {
                 return NotFound();
@@ -40,7 +53,13 @@ namespace Northwind.WebAPI.Controllers
 
         public async Task<IActionResult> GetProductsByCategory( [FromQuery] CategoryProductsRequest categoryProductsRequest)
         {
-            var products = await _productService.GetProductsByCategory(categoryProductsRequest);
+            var token = Request.Headers.Authorization.ToString();
+
+            if (token.StartsWith("Bearer "))
+            {
+                token = token["Bearer ".Length..].Trim();
+            }
+            var products = await _productService.GetProductsByCategory(categoryProductsRequest, token);
             return Ok(products);
         }
 
