@@ -7,25 +7,13 @@ services:
     ports:
       - "5142:8080"  # Backend portu
     depends_on:
-      - sqlserver  # SQL Server'a bağlı
       - rabbitmq   # RabbitMQ'ya bağlı
       - redis       # Redis'e bağlı
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__Data Source=localhost,1433;Initial Catalog=northwind;User ID=sa;Password=Yy654321**;TrustServerCertificate=True
+      - ConnectionStrings__Server=134.122.68.208,1433;Database=northwind;User Id=sa;Password=Yy654321**;TrustServerCertificate=True;
     networks:
       - mynetwork
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server
-    environment:
-      SA_PASSWORD: "Yy654321**"  # Güçlü bir parola
-      ACCEPT_EULA: "Y"  # EULA kabulü
-    ports:
-      - "1433:1433"  # SQL Server portu
-    networks:
-      - mynetwork
-
   rabbitmq:
     image: rabbitmq:management
     container_name: "rabbitmq"
