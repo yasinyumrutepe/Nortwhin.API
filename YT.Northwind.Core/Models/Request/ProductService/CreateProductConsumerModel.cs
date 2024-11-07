@@ -10,6 +10,8 @@ namespace Northwind.Core.Models.Request.ProductService
         public decimal UnitPrice { get; set; }
         public string QuantityPerUnit { get; set; }
         public string Description { get; set; }
+        public List<int> Size { get; set; }
+        public int Color { get; set; }
         public List<UploadImageResponseModel> Images { get; set; }
 
     }

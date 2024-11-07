@@ -33,11 +33,25 @@ namespace Northwind.Product.Consumer.Concrete
                 CategoryID = product.CategoryID,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
-                ProductImages = productImages
-               
+                ProductImages = productImages,
+
             };
 
-          return  await _productRepository.AddAsync(productEntities);
+            foreach (var size in product.Size)
+            {
+             productEntities.ProductVariants.Add(new Entities.Concrete.ProductVariant
+             {
+                 VariantID = size
+             });
+            }
+
+            productEntities.ProductColor = new Entities.Concrete.ProductColor
+            {
+                VariantID = product.Color
+            };
+
+
+            return  await _productRepository.AddAsync(productEntities);
 
            
 

@@ -21,9 +21,10 @@ namespace Northwind.Product.Consumer
                     CategoryID = newProduct.CategoryID,
                     UnitPrice = newProduct.UnitPrice,
                     Description = newProduct.Description,
-                    ProductImages = newProduct.Images
-
-                });
+                    ProductImages = newProduct.Images,
+                   Size = newProduct.Size,
+                   Color = newProduct.Color
+               });
                 await Task.CompletedTask;
             }
             catch (Exception ex)

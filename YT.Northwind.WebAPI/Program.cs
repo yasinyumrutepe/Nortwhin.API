@@ -23,7 +23,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<UpdateProductConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq", h =>
+        cfg.Host("localhost", h =>
         {
             h.Username("guest");
             h.Password("guest");
@@ -97,18 +97,9 @@ builder.Services.AddCors(options =>
                  .AllowAnyHeader()
                  .AllowAnyMethod();
          });
-    options.AddPolicy(name: "AllowOnlySomeOrigins",
-        configurePolicy: policy =>
-        {   
-            policy.WithOrigins("http://localhost:3000/",
-                "https://localhost:3000/",
-                "http://front.localhost:3000/",
-                "https://front.locahost:3000"
-                );
-        });
+    
 });
 
-Console.WriteLine("Hello World!");
 
 
 var app = builder.Build();

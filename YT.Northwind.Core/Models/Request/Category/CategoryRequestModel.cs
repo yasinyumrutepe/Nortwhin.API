@@ -3,7 +3,14 @@
 {
     public class CategoryRequestModel
     {
+        public int CategoryID { get; set; }
         public string CategoryName { get; set; }
-        public string Description { get; set; }
+        public List<SubCategoryRequestModel> List { get; set; }
+    }
+
+    public class SubCategoryRequestModel
+    {
+        
+        public string SubCategoryName { get; set; }
     }
 }

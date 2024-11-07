@@ -18,13 +18,13 @@ namespace Northwind.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] AllProductRequestModel productfilter )
         {
+            Console.WriteLine("geldi");
             var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-
+           
+                if (token.StartsWith("Bearer "))
+                {
+                    token = token["Bearer ".Length..].Trim();
+                }
             var products = await _productService.GetAllProductAsync(productfilter, token);
 
 
