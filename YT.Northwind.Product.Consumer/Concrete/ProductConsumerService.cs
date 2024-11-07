@@ -5,6 +5,7 @@ using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.ProductService;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 namespace Northwind.Product.Consumer.Concrete
 {
@@ -45,10 +46,10 @@ namespace Northwind.Product.Consumer.Concrete
              });
             }
 
-            productEntities.ProductColor = new Entities.Concrete.ProductColor
+            productEntities.ProductVariants.Add(new Entities.Concrete.ProductVariant
             {
                 VariantID = product.Color
-            };
+            });
 
 
             return  await _productRepository.AddAsync(productEntities);
