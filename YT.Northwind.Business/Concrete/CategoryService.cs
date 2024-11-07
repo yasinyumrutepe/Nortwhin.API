@@ -29,12 +29,43 @@ namespace Northwind.Business.Concrete
             var category = await _categoryRepository.GetAsync(filter: c => c.CategoryID == id,include:p=>p.Include(p=>p.Products));
             return  _mapper.Map<CategoryResponseModel>(category);
         }
-        public async Task<CategoryResponseModel> AddCategoryAsync(CategoryRequestModel category)
+        public async Task<List<CategoryResponseModel>> AddCategoryAsync(List<CategoryRequestModel> request)
         {
-            var categoryEntity = _mapper.Map<Category>(category);
-            var addedCategory = await _categoryRepository.AddAsync(categoryEntity);
-            var responseDto = _mapper.Map<CategoryResponseModel>(addedCategory);
-            return responseDto;
+            List<Category> categories = [];
+
+
+            foreach (var item in request)
+            {
+                Category category = new();
+
+                category.CategoryName = item.CategoryName;
+                category.Slug = GenerateSlug(item.CategoryName);
+
+                if(item.CategoryID != 0)
+                {
+                    category.CategoryID = item.CategoryID;
+                    await _categoryRepository.UpdateAsync(category);
+                }else
+                {
+                   var addedCategory = await _categoryRepository.AddAsync(category);
+                    category.CategoryID = addedCategory.CategoryID;
+                }
+
+                if (item.List !=null)
+                {
+                    foreach (var subCategory in item.List)
+                    {
+                       Category subCategories = new();
+                        subCategories.CategoryName = subCategory.SubCategoryName;
+                        subCategories.Slug = GenerateSlug(subCategory.SubCategoryName);
+                        subCategories.MainCategoryID = category.CategoryID;
+
+                       await _categoryRepository.AddAsync(subCategories);
+                    }
+                }
+            }
+            var allCategory = await _categoryRepository.GetAllAsync();
+            return _mapper.Map<List<CategoryResponseModel>>(allCategory);
         }
       
         public async Task<CategoryResponseModel> UpdateCategoryAsync(CategoryUpdateRequestModel category)
@@ -48,6 +79,16 @@ namespace Northwind.Business.Concrete
            var category = await _categoryRepository.GetAsync(filter: c => c.CategoryID == id);
             var isDeleted = await _categoryRepository.DeleteAsync(category);
            return isDeleted;
+        }
+
+
+        private string GenerateSlug(string categoryName)
+        {
+            return categoryName
+                .ToLower()
+                .Replace(" ", "-")
+                .Replace("--", "-")
+                .Trim('-');
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Northwind.Business.Extensions
 
            services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = "redis:6379";
+                options.Configuration = "localhost:6379";
             });
 
 

@@ -10,7 +10,8 @@ namespace Northwind.Core.Models.Request.Product
         public decimal UnitPrice { get; set; }
         public string Description { get; set; }
         public short UnitsInStock { get; set; }
-        public List<Variant> Variants { get; set; }
-    public IFormFile[] Images { get; set; }
+        public List<int> Size { get; set; }
+        public int Color { get; set; }
+        public IFormFile[] Images { get; set; }
     }
 }

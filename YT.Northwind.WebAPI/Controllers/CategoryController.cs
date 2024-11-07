@@ -11,12 +11,17 @@ namespace Northwind.WebAPI.Controllers
     {
         private readonly ICategoryService _categoryService = categoryService;
 
+        #region GetAllCategory
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery ]PaginatedRequest paginatedRequest)
         {
             var categories = await _categoryService.GetAllCategoriesAsync(paginatedRequest);
             return Ok(categories);
         }
+        #endregion
+
+
+        #region GetCategory
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -29,12 +34,17 @@ namespace Northwind.WebAPI.Controllers
             return Ok(category);
         }
 
+        #endregion
+
+        #region AddCategory
+
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] CategoryRequestModel category)
+        public async Task<IActionResult> Add([FromBody] List<CategoryRequestModel> category)
         {
             var addedCategory = await _categoryService.AddCategoryAsync(category);
-            return CreatedAtAction("Get", new { id = addedCategory.CategoryID }, addedCategory);
+            return Ok(addedCategory);
         }
+        #endregion
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] CategoryUpdateRequestModel category)

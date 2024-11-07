@@ -33,10 +33,10 @@ namespace Northwind.Business.Mapper
             CreateMap<ProductUpdateRequestModel,Product>();
 
             //CategoryRequestModel to Category
-            CreateMap<CategoryRequestModel,Category>();
+            CreateMap<CategoryRequestModel, Category>();
             CreateMap<Category, CategoryResponseModel>();
             CreateMap<PaginatedResponse<Category>, PaginatedResponse<CategoryResponseModel>>();
-            CreateMap<CategoryUpdateRequestModel,Category>();
+            CreateMap<CategoryUpdateRequestModel, Category>();
 
 
             //EmployeeRequestModel to Employee

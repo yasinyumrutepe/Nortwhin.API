@@ -11,7 +11,7 @@ namespace Northwind.Business.Abstract
     {
         Task<PaginatedResponse<CategoryResponseModel>> GetAllCategoriesAsync(PaginatedRequest paginated);
         Task<CategoryResponseModel> GetCategoryAsync(int id);
-        Task<CategoryResponseModel> AddCategoryAsync(CategoryRequestModel category);
+        Task<List<CategoryResponseModel>> AddCategoryAsync(List<CategoryRequestModel> category);
         Task<CategoryResponseModel> UpdateCategoryAsync(CategoryUpdateRequestModel category);
         Task<int> DeleteCategoryAsync(int id);
 
