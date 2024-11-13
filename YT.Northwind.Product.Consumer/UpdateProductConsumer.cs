@@ -18,13 +18,15 @@ namespace Northwind.Product.Consumer
             {
                 ProductID = product.ProductID,
                 ProductName = product.ProductName,
-                CategoryID = product.CategoryID,
+                Categories = product.Categories,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
                 UnitsInStock = product.UnitsInStock,
+                Sizes = product.Sizes,
+                Color = product.Color,
             });
 
-          await context.RespondAsync(updatedProduct);
+            await Task.CompletedTask;
         }
           
     }

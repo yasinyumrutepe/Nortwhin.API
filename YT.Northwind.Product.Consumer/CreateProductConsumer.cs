@@ -18,7 +18,7 @@ namespace Northwind.Product.Consumer
                await _productConsumerService.AddProductAsync(new AddProductConsumerRequest
                 {
                     ProductName = newProduct.ProductName,
-                    CategoryID = newProduct.CategoryID,
+                    Categories = newProduct.Categories,
                     UnitPrice = newProduct.UnitPrice,
                     Description = newProduct.Description,
                     ProductImages = newProduct.Images,

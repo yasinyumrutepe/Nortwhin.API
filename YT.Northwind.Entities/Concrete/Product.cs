@@ -5,7 +5,6 @@ namespace Northwind.Entities.Concrete
     public class Product
     {
         public int ProductID { get; set; }
-        public int CategoryID { get; set; }
         public string ProductName { get; set; }
         public decimal UnitPrice { get; set; }
         public short UnitsInStock { get; set; }
@@ -19,6 +18,7 @@ namespace Northwind.Entities.Concrete
         public virtual ICollection<ProductReview> ProductReviews { get; set; }
         public virtual ICollection<ProductFavorite> ProductFavorites { get; set; }
         public virtual ICollection<ProductVariant> ProductVariants { get; set; }
+        public virtual ICollection<ProductCategory> ProductCategories { get; set; }
 
     }
 }

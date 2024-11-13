@@ -15,7 +15,7 @@ namespace Northwind.Business.Abstract
 
         Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest,string token);
         Task<string> AddProductAsync(ProductRequestModel product);
-        Task<ProductResponseModel> UpdateProductAsync(ProductUpdateRequestModel product);
+        Task<string> UpdateProductAsync(ProductUpdateRequestModel product);
         Task<int> DeleteProductAsync(int id);
     }
 }
