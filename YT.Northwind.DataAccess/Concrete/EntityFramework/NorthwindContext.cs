@@ -23,8 +23,8 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
         public DbSet<ProductReview> ProductReviews { get; set; }
         public DbSet<ProductFavorite> ProductFavorites { get; set; }
         public DbSet<Variant> Variants { get; set; }
-
         public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
 
 
 
@@ -33,10 +33,11 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {   
+        {
+       
 
+    
             modelBuilder.Entity<OrderDetail>().HasKey(x => new { x.OrderID, x.ProductID });
-            modelBuilder.Entity<Product>().HasOne(x => x.Category).WithMany(x => x.Products).HasForeignKey(x => x.CategoryID);
             modelBuilder.Entity<ProductFavorite>().HasKey(x => x.ProductFavoriteID);
             modelBuilder.Entity<OrderStatus>()
            .HasKey(os => new { os.OrderStatusID }); 
@@ -51,6 +52,22 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
                 .WithMany(s => s.OrderStatuses)
                 .HasForeignKey(os => os.StatusID);
 
+            modelBuilder.Entity<ProductCategory>()
+            .Property(p => p.ProductCategoryID)
+            .ValueGeneratedOnAdd();
+            modelBuilder.Entity<ProductCategory>()
+                .HasOne(pc => pc.Product)
+                .WithMany(p => p.ProductCategories)
+                .HasForeignKey(pc => pc.ProductID);
+
+            modelBuilder.Entity<ProductVariant>()
+                .Property (p => p.ProductVariantID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasOne(pc=>pc.Product)
+                .WithMany(p => p.ProductVariants)
+                .HasForeignKey(pc => pc.ProductID);
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);

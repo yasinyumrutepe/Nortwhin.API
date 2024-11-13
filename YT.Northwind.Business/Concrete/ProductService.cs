@@ -3,6 +3,7 @@ using AutoMapper;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.SqlServer.Server;
 using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
 using Northwind.Core.Models.Request.Product;
@@ -43,7 +44,8 @@ namespace Northwind.Business.Concrete
                         .Select(id => int.Parse(id.Trim()))
                         .ToList();
 
-                    query = query.Where(p => categoryIds.Contains(p.CategoryID));
+                    query = query.Where(p => p.ProductCategories.Any(pc => categoryIds.Contains(pc.CategoryID)));
+                  
                 }
 
                 if (productFilter.ProductFilterKeys.MinPrice > 0)
@@ -118,13 +120,17 @@ namespace Northwind.Business.Concrete
                 {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
-                    .Include(p => p.ProductReviews);
+                    .Include(p => p.ProductReviews)
+                    .Include(p => p.ProductVariants)
+                    .Include(p => p.ProductCategories).ThenInclude(p => p.Category);
             }
             else
             {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
                     .Include(p => p.ProductReviews)
+                    .Include(p => p.ProductCategories).ThenInclude(p=>p.Category)
+                    .Include(p => p.ProductVariants).ThenInclude(p=>p.Variant)
                     .Include(p => p.ProductFavorites.Where(c => c.CustomerID == _tokenService.GetCustomerIDClaim(token)));
             }
 
@@ -161,7 +167,7 @@ namespace Northwind.Business.Concrete
             var category = await _categoryRepository.GetAsync(c => c.Slug == categoryProductsRequest.Slug);
 
             var products = await _productRepository.GetAllAsync2(paginatedRequest,
-                predicate: p => p.Category.MainCategoryID == category.CategoryID || p.CategoryID == category.CategoryID,
+                predicate: p => p.Category.Parent_ID == category.CategoryID ,
                 include: includeExpression,
                 orderBy: p => p.OrderBy(p => p.ProductID)
             );
@@ -177,16 +183,23 @@ namespace Northwind.Business.Concrete
         {
 
           var imagesResult = await _cloudinaryService.UploadImageAsync(product.Images,"Northwind");
-                
+
+            List<int> categories = product.Categories.Split(',')
+                              .Select(int.Parse)
+                              .ToList();
+            List<int> sizes = product.Size.Split(',')
+                .Select(int.Parse)
+                .ToList();
+
             var productConsumerModel = new CreateProductConsumerModel
             {
                 ProductName = product.ProductName,
-                CategoryID = product.CategoryID,
+                Categories = categories,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
                 Images = imagesResult,
                 Color = product.Color,
-                Size = product.Size,
+                Size = sizes,
             };
             await _bus.Send(productConsumerModel);
 
@@ -196,21 +209,23 @@ namespace Northwind.Business.Concrete
         #endregion
 
         #region UpdateProductAsync
-        public async Task<ProductResponseModel> UpdateProductAsync(ProductUpdateRequestModel product)
+        public async Task<string> UpdateProductAsync(ProductUpdateRequestModel product)
         {
-            var updateReq = _bus.CreateRequestClient<UpdateProductConsumerModel>();
-            var updateRes = await updateReq.GetResponse<Product>(new UpdateProductConsumerModel
+            var updatedProduct = new UpdateProductConsumerModel
             {
                 ProductID = product.ProductID,
                 ProductName = product.ProductName,
-                CategoryID = product.CategoryID,
+                Categories = product.Categories,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
-                UnitsInStock = product.UnitsInStock
+                UnitsInStock = product.UnitsInStock,
+                Sizes = product.Sizes,
+                Color = product.Colors
+            };
 
-            });
+            await _bus.Send(updatedProduct);
 
-            return  _mapper.Map<ProductResponseModel>(updateRes.Message);
+            return "Product Updated Send Queue";
         }
 
         #endregion

@@ -18,9 +18,12 @@ namespace Northwind.Business.Concrete
         private readonly IMapper _mapper = mapper;
 
         public async Task<PaginatedResponse<CategoryResponseModel>> GetAllCategoriesAsync(PaginatedRequest paginated)
-        {   
-           return _mapper.Map<PaginatedResponse<CategoryResponseModel>>(await _categoryRepository.GetAllAsync2(paginated,include:c=>c.Include(x=>x.Products)));
-          
+        {
+            var categories = await _categoryRepository.GetAllAsync2(
+                paginated
+            );
+
+            return _mapper.Map<PaginatedResponse<CategoryResponseModel>>(categories);
         }
         public async Task<CategoryResponseModel> GetCategoryAsync(int id)
         {
@@ -38,7 +41,7 @@ namespace Northwind.Business.Concrete
             {
                 Category category = new();
 
-                category.CategoryName = item.CategoryName;
+                category.Name = item.CategoryName;
                 category.Slug = GenerateSlug(item.CategoryName);
 
                 if(item.CategoryID != 0)
@@ -56,9 +59,9 @@ namespace Northwind.Business.Concrete
                     foreach (var subCategory in item.List)
                     {
                        Category subCategories = new();
-                        subCategories.CategoryName = subCategory.SubCategoryName;
+                        subCategories.Name = subCategory.SubCategoryName;
                         subCategories.Slug = GenerateSlug(subCategory.SubCategoryName);
-                        subCategories.MainCategoryID = category.CategoryID;
+                        subCategories.Parent_ID = category.CategoryID;
 
                        await _categoryRepository.AddAsync(subCategories);
                     }

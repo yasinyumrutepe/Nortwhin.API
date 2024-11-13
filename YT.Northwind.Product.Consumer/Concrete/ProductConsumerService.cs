@@ -1,11 +1,8 @@
 ﻿using Northwind.DataAccess.Repositories.Abstract;
 using Northwind.Product.Consumer.Models.Request;
 using Northwind.Product.Consumer.Abstract;
-using Northwind.Core.Models.Request;
-using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.ProductService;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
 
 namespace Northwind.Product.Consumer.Concrete
 {
@@ -28,55 +25,95 @@ namespace Northwind.Product.Consumer.Concrete
 
                 });
             }
-            var productEntities = new Entities.Concrete.Product
-            {
-                ProductName = product.ProductName,
-                CategoryID = product.CategoryID,
-                UnitPrice = product.UnitPrice,
-                Description = product.Description,
-                ProductImages = productImages,
 
-            };
+            var productCategories = new List<Entities.Concrete.ProductCategory>();
 
-            foreach (var size in product.Size)
+            foreach (var category in product.Categories)
             {
-             productEntities.ProductVariants.Add(new Entities.Concrete.ProductVariant
-             {
-                 VariantID = size
-             });
+                productCategories.Add(new Entities.Concrete.ProductCategory
+                {
+                    CategoryID = category
+                });
             }
 
-            productEntities.ProductVariants.Add(new Entities.Concrete.ProductVariant
+            var variants = new List<Entities.Concrete.ProductVariant>();
+            foreach (var variant in product.Size)
+            {
+
+                variants.Add(new Entities.Concrete.ProductVariant
+                {
+                    VariantID = variant
+                });
+
+            }
+            variants.Add(new Entities.Concrete.ProductVariant
             {
                 VariantID = product.Color
             });
 
-
-            return  await _productRepository.AddAsync(productEntities);
-
-           
-
-        }
-
-       
-       
-
-      
-
-        public async Task<Entities.Concrete.Product> UpdateProductAsync(UpdateProductConsumerRequest product)
-        {
-         var updatedProduct= await _productRepository.UpdateAsync(new Entities.Concrete.Product
+            var productEntities = new Entities.Concrete.Product
             {
-                ProductID = product.ProductID,
                 ProductName = product.ProductName,
-                CategoryID = product.CategoryID,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
-                UnitsInStock = product.UnitsInStock
-         });
+                ProductImages = productImages,
+                ProductCategories = productCategories,
+                ProductVariants = variants,
+                CreatedAt = DateTime.Now,
 
+            };
+
+            return  await _productRepository.AddAsync(productEntities);
+        }
+        public async Task<Entities.Concrete.Product> UpdateProductAsync(UpdateProductConsumerRequest product)
+        {
+             var dbProduct = await _productRepository.GetAsync(p => p.ProductID == product.ProductID,include:p =>p.Include(p=>p.ProductCategories).Include(p=>p.ProductVariants));
+
+            if (dbProduct == null)
+            {
+                return null;
+            }
+
+
+            dbProduct.ProductCategories.Clear();
+            dbProduct.ProductVariants.Clear();
+
+
+            var productCategories = new List<Entities.Concrete.ProductCategory>();
+            foreach (var category in product.Categories) {
+                productCategories.Add(new Entities.Concrete.ProductCategory
+                {
+                    CategoryID = category
+                });
+            }
+
+            var productVariants = new List<Entities.Concrete.ProductVariant>();
+            foreach (var variant in product.Sizes)
+            {
+                productVariants.Add(new Entities.Concrete.ProductVariant
+                {
+                    VariantID = variant
+                });
+            }
+            if (product.Color != 0)
+            {
+                productVariants.Add(new Entities.Concrete.ProductVariant
+                {
+                    VariantID = product.Color
+                });
+            }
+          
+
+            dbProduct.ProductID = product.ProductID;
+            dbProduct.ProductCategories = productCategories;
+            dbProduct.ProductVariants = productVariants;
+            dbProduct.ProductName = product.ProductName;
+            dbProduct.UnitPrice = product.UnitPrice;
+            dbProduct.Description = product.Description;
+            dbProduct.UnitsInStock = product.UnitsInStock;
+            dbProduct.CreatedAt = DateTime.Now;
+            var updatedProduct = await _productRepository.UpdateAsync(dbProduct);
             return updatedProduct;
-
         }
 
         public async Task<DeleteProductConsumerResponseModel> DeleteProductAsync(int id)
@@ -88,7 +125,5 @@ namespace Northwind.Product.Consumer.Concrete
                 IsDeleted = isDeleted
             };
         }
-
-       
     }
 }
