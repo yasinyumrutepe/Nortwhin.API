@@ -7,9 +7,7 @@ using Northwind.Core.Models.Request.Order;
 using Northwind.Core.Models.Response;
 using Northwind.Core.Models.Response.Order;
 using Northwind.DataAccess.Repositories.Abstract;
-using Northwind.DataAccess.Repositories.Concrete;
 using Northwind.Entities.Concrete;
-using Stripe;
 
 namespace Northwind.Business.Concrete
 {
@@ -39,10 +37,10 @@ namespace Northwind.Business.Concrete
         }
 
 
-        public async Task<OrderResponseModel> AddOrderAsync(string token,OrderRequestModel orderRequest)
+        public async Task<OrderResponseModel> AddOrderAsync(string token,string ipAddress,OrderRequestModel orderRequest)
         {       
             var customerID = _tokenService.GetCustomerIDClaim(token);
-            var basket = _basketService.GetBasket(token);
+            var basket = _basketService.GetBasket(ipAddress);
             var orderDetails = new List<OrderDetailRequestModel>();
             var orderNumber = await GenerateOrderNumber();
             foreach (var item in basket.Items) {
@@ -67,7 +65,10 @@ namespace Northwind.Business.Concrete
                 OrderNumber = orderNumber,
                 TotalPrice = basket.TotalPrice,
                 OrderDetails = _mapper.Map<ICollection<OrderDetail>>(orderDetails),
-                OrderStatuses = [new OrderStatus { StatusID = 1, CreatedAt = DateTime.Now }]
+                OrderStatuses =
+    [
+        new() { StatusID = 1, CreatedAt = DateTime.Now }
+    ]
             });
             var addedProduct = await _orderRepository.AddAsync(orderEntity);
 
@@ -76,7 +77,7 @@ namespace Northwind.Business.Concrete
                 return null;
             }
 
-            _basketService.ClearBasket(token);
+            _basketService.ClearBasket(ipAddress);
             var responseDto = _mapper.Map<OrderResponseModel>(addedProduct);
 
             return responseDto;

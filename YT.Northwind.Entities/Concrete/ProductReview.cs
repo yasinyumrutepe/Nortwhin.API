@@ -9,5 +9,6 @@ namespace Northwind.Entities.Concrete
         public string CustomerID { get; set; }
         public string Review { get; set; }
         public decimal Star { get; set; }
+        public int OrderID { get; set; }
     }
 }

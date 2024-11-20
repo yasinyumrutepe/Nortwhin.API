@@ -47,13 +47,15 @@ namespace Northwind.WebAPI.Controllers
 
         public async Task<IActionResult> Add([FromBody] OrderRequestModel orderRequest)
         {
+
+            string ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
             var token = Request.Headers.Authorization.ToString();
 
             if (token.StartsWith("Bearer "))
             {
                 token = token["Bearer ".Length..].Trim();
             }
-            var addedOrder = await _orderService.AddOrderAsync(token, orderRequest);
+            var addedOrder = await _orderService.AddOrderAsync(token, ipAddress, orderRequest);
             return CreatedAtAction("Get", new { id = addedOrder.OrderID }, addedOrder);
         }
 

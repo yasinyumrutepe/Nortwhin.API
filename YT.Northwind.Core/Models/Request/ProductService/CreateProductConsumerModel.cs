@@ -9,6 +9,7 @@ namespace Northwind.Core.Models.Request.ProductService
         public ICollection<int> Categories { get; set; }
         public decimal UnitPrice { get; set; }
         public string QuantityPerUnit { get; set; }
+        public short UnitsInStock { get; set; }
         public string Description { get; set; }
         public ICollection<int> Size { get; set; }
         public int Color { get; set; }

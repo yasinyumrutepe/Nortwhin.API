@@ -35,6 +35,7 @@ namespace Northwind.WebAPI.Controllers
             };
             var service = new PaymentIntentService();
             PaymentIntent intent = service.Create(options);
+
             return Json(new { client_secret = intent.ClientSecret });
         }
 }

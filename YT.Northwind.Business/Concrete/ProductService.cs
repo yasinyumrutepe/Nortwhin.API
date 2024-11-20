@@ -3,6 +3,7 @@ using AutoMapper;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.SqlServer.Server;
 using Northwind.Business.Abstract;
 using Northwind.Core.Models.Request;
@@ -58,6 +59,24 @@ namespace Northwind.Business.Concrete
                     query = query.Where(p => p.UnitPrice <= productFilter.ProductFilterKeys.MaxPrice);
                 }
 
+                if(!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Colors))
+                {
+                    var colors = productFilter.ProductFilterKeys.Colors
+                       .Split(',')
+                       .Select(id => int.Parse(id.Trim()))
+                       .ToList();
+                    query = query.Where(p => p.ProductVariants.Any(pc => colors.Contains(pc.VariantID)));
+                }
+
+                if(!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Sizes))
+                {
+                    var sizes = productFilter.ProductFilterKeys.Sizes
+                       .Split(',')
+                       .Select(id => int.Parse(id.Trim()))
+                       .ToList();
+                    query = query.Where(p => p.ProductVariants.Any(pc => sizes.Contains(pc.VariantID)));
+                }
+
                 if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Ratings))
                 {
                     var ratingValues = productFilter.ProductFilterKeys.Ratings
@@ -79,6 +98,7 @@ namespace Northwind.Business.Concrete
                 "priceAsc" => q => q.OrderBy(p => p.UnitPrice),
                 "priceDesc" => q => q.OrderByDescending(p => p.UnitPrice),
                 "newest" => q => q.OrderByDescending(p => p.CreatedAt),
+                "bestSelling" => q => q.OrderBy(p => p.UnitPrice),
                 _ => q => q.OrderBy(p => p.ProductID),
             };
             Console.WriteLine(token);
@@ -86,12 +106,14 @@ namespace Northwind.Business.Concrete
             {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
+                    .Include(p => p.ProductCategories).ThenInclude(p=>p.Category)
                     .Include(p => p.ProductReviews);
             }
             else
             {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
+                    .Include(p => p.ProductCategories).ThenInclude(p => p.Category)
                     .Include(p => p.ProductReviews)
                     .Include(p => p.ProductFavorites.Where(c => c.CustomerID == _tokenService.GetCustomerIDClaim(token)));
             }
@@ -140,36 +162,117 @@ namespace Northwind.Business.Concrete
         #endregion
 
         #region GetProductsByCategory
-        public async Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(CategoryProductsRequest categoryProductsRequest, string token)
+        public async Task<PaginatedResponse<ProductResponseModel>> GetProductsByCategory(AllProductRequestModel productFilter, string token)
         {
+            Func<IQueryable<Product>, IOrderedQueryable<Product>> orderBy = null;
             Func<IQueryable<Product>, IIncludableQueryable<Product, object>> includeExpression;
 
-            var customerID = string.IsNullOrEmpty(token) ? null : _tokenService.GetCustomerIDClaim(token);
-            var paginatedRequest = new PaginatedRequest
+            int categoryID=0;
+
+            if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Slug))
             {
-                Page = categoryProductsRequest.Page,
-                Limit = categoryProductsRequest.Limit
+
+                var category = await _categoryRepository.GetAsync(c => c.Slug == productFilter.ProductFilterKeys.Slug);
+
+                if (category != null)
+                {
+                    categoryID = category.CategoryID;
+                }
+            }
+
+
+            IQueryable<Product> filter(IQueryable<Product> query)
+            {
+                if (productFilter.ProductFilterKeys == null) return query;
+
+                if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Categories))
+                {
+                    var categoryIds = productFilter.ProductFilterKeys.Categories
+                        .Split(',')
+                        .Select(id => int.Parse(id.Trim()))
+                        .ToList();
+                    categoryIds.Add(categoryID);
+               
+                    query = query.Where(p => p.ProductCategories.Any(pc => categoryIds.Contains(pc.CategoryID))  );
+
+                }else
+                {
+                    query = query.Where(p => p.ProductCategories.Any(pc=>pc.CategoryID == categoryID));
+                }
+
+                if (productFilter.ProductFilterKeys.MinPrice > 0)
+                {
+                    query = query.Where(p => p.UnitPrice >= productFilter.ProductFilterKeys.MinPrice);
+                }
+
+                if (productFilter.ProductFilterKeys.MaxPrice > 0)
+                {
+                    query = query.Where(p => p.UnitPrice <= productFilter.ProductFilterKeys.MaxPrice);
+                }
+
+                if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Colors))
+                {
+                    var colors = productFilter.ProductFilterKeys.Colors
+                       .Split(',')
+                       .Select(id => int.Parse(id.Trim()))
+                       .ToList();
+                    query = query.Where(p => p.ProductVariants.Any(pc => colors.Contains(pc.VariantID)));
+                }
+
+                if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Sizes))
+                {
+                    var sizes = productFilter.ProductFilterKeys.Sizes
+                       .Split(',')
+                       .Select(id => int.Parse(id.Trim()))
+                       .ToList();
+                    query = query.Where(p => p.ProductVariants.Any(pc => sizes.Contains(pc.VariantID)));
+                }
+
+                if (!string.IsNullOrEmpty(productFilter.ProductFilterKeys.Ratings))
+                {
+                    var ratingValues = productFilter.ProductFilterKeys.Ratings
+                        .Split(',')
+                        .Select(r => decimal.Parse(r.Trim()))
+                        .ToList();
+
+                    query = query.Where(p =>
+                        p.ProductReviews.Any() &&
+                        ratingValues.Contains(p.ProductReviews.Average(r => r.Star))
+                    );
+                }
+
+                return query;
+            }
+
+            orderBy = productFilter.OrderByKey switch
+            {
+                "priceAsc" => q => q.OrderBy(p => p.UnitPrice),
+                "priceDesc" => q => q.OrderByDescending(p => p.UnitPrice),
+                "newest" => q => q.OrderByDescending(p => p.CreatedAt),
+                _ => q => q.OrderBy(p => p.ProductID),
             };
             if (string.IsNullOrEmpty(token))
             {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
+                      .Include(p => p.ProductCategories).ThenInclude(p => p.Category)
                     .Include(p => p.ProductReviews);
             }
             else
             {
                 includeExpression = p => p
                     .Include(p => p.ProductImages)
+                      .Include(p => p.ProductCategories).ThenInclude(p => p.Category)
                     .Include(p => p.ProductReviews)
                     .Include(p => p.ProductFavorites.Where(c => c.CustomerID == _tokenService.GetCustomerIDClaim(token)));
             }
-              
-            var category = await _categoryRepository.GetAsync(c => c.Slug == categoryProductsRequest.Slug);
 
-            var products = await _productRepository.GetAllAsync2(paginatedRequest,
-                predicate: p => p.Category.Parent_ID == category.CategoryID ,
+
+            var products = await _productRepository.GetAllAsync2(
+                productFilter.PaginatedRequest,
                 include: includeExpression,
-                orderBy: p => p.OrderBy(p => p.ProductID)
+                filterFunc: filter,
+                orderBy: orderBy
             );
 
             return _mapper.Map<PaginatedResponse<ProductResponseModel>>(products);

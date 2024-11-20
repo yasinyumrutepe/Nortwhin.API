@@ -56,6 +56,7 @@ namespace Northwind.Product.Consumer.Concrete
                 ProductName = product.ProductName,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
+                UnitsInStock = product.UnitsInStock,
                 ProductImages = productImages,
                 ProductCategories = productCategories,
                 ProductVariants = variants,
