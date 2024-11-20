@@ -2,6 +2,7 @@
 using 
     Northwind.Business.Abstract;
 using Northwind.Core.Models.Request.Auth;
+using Northwind.Core.Models.Request.User;
 
 namespace Northwind.WebAPI.Controllers
 {
@@ -24,6 +25,13 @@ namespace Northwind.WebAPI.Controllers
         {
            var registerResponse = await _authService.RegisterUserAsync(registerRequest);
             return Ok(registerResponse);
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestModel changePasswordRequest)
+        {
+            var changePasswordResponse = await _authService.ChangePasswordAsync(changePasswordRequest);
+            return Ok(changePasswordResponse);
         }
     }
 }

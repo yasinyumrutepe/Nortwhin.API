@@ -13,7 +13,7 @@ namespace Northwind.Business.Abstract
         Task<PaginatedResponse<OrderResponseModel>> GetAllOrdersAsync(PaginatedRequest paginated);
         Task<OrderResponseModel> GetOrderAsync(int id);
         Task<PaginatedResponse<OrderResponseModel>> GetCustomerOrders(string token, PaginatedRequest paginatedRequest);
-        Task<OrderResponseModel> AddOrderAsync(string token, OrderRequestModel orderRequest);
+        Task<OrderResponseModel> AddOrderAsync(string token,string ipAddress, OrderRequestModel orderRequest);
         Task<OrderResponseModel> UpdateOrderAsync(OrderUpdateRequestModel order);
 
         Task<OrderResponseModel> ChangeOrderStatusAsync(ChangeOrderStatusRequestModel changeOrderStatusRequestModel);

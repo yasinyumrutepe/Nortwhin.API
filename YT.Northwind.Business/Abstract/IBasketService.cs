@@ -6,17 +6,17 @@ namespace Northwind.Business.Abstract
     public interface IBasketService
     {
         public BasketResponseModel GetAllBasket();
-        public BasketRequestModel GetBasket(string token);
+        public BasketRequestModel GetBasket(string ipAddress);
 
-        public Task<BasketResponseModel> AddToBasket(BasketRequestModel basketRequests,string token);
+        public Task<BasketResponseModel> AddToBasket(BasketRequestModel basketRequests,string ipAddress);
 
-        public BasketRequestModel DeleteFromBasket(string token,int productID);
+        public BasketRequestModel DeleteFromBasket(string ipAddress, int productID);
 
-        public int ClearBasket(string token);
+        public int ClearBasket(string ipAddress);
 
-        public BasketRequestModel UpdateQuantity(string token, int productID, int quantity);
+        public BasketRequestModel UpdateQuantity(string ipAddress , int productID, int quantity);
 
-        public Task<BasketRequestModel> AddCampaign(string token, string campaignName);
+        public Task<BasketRequestModel> AddCampaign(string ipAddress, string campaignName);
 
 
 

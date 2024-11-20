@@ -34,10 +34,8 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-       
-
-    
             modelBuilder.Entity<OrderDetail>().HasKey(x => new { x.OrderID, x.ProductID });
+            modelBuilder.Entity<OrderStatus>().HasKey(x => new { x.OrderID, x.StatusID });
             modelBuilder.Entity<ProductFavorite>().HasKey(x => x.ProductFavoriteID);
             modelBuilder.Entity<OrderStatus>()
            .HasKey(os => new { os.OrderStatusID }); 
@@ -68,6 +66,20 @@ namespace Northwind.DataAccess.Concrete.EntityFramework
                 .HasOne(pc=>pc.Product)
                 .WithMany(p => p.ProductVariants)
                 .HasForeignKey(pc => pc.ProductID);
+
+            modelBuilder.Entity<OrderStatus>()
+            .HasOne(os => os.Order)
+            .WithMany(o => o.OrderStatuses)     
+            .HasForeignKey(os => os.OrderID);
+
+            modelBuilder.Entity<OrderStatus>()
+                .HasOne(os => os.Status)
+                .WithMany(s => s.OrderStatuses)
+                .HasForeignKey(os => os.StatusID);
+
+            modelBuilder.Entity<OrderStatus>()
+                .Property(p => p.OrderStatusID)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);

@@ -22,6 +22,7 @@ namespace Northwind.Product.Consumer
                     UnitPrice = newProduct.UnitPrice,
                     Description = newProduct.Description,
                     ProductImages = newProduct.Images,
+                   UnitsInStock = newProduct.UnitsInStock,
                    Size = newProduct.Size,
                    Color = newProduct.Color
                });

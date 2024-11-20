@@ -1,10 +1,15 @@
-﻿namespace Northwind.Core.Models.Request.Auth
+﻿using Northwind.Entities.Concrete;
+
+namespace Northwind.Core.Models.Request.Auth
 {
     public class RegisterRequestModel
     {
 
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public string CustomerID { get; set; }
+        public string ConfirmPassword { get; set; }
+
     }
 }

@@ -51,7 +51,21 @@ namespace Northwind.Business.Concrete
         }
 
         public async Task<CustomerResponseModel> UpdateCustomerAsync(CustomerUpdateRequestModel customer)
-        {  var updatedCustomer = _mapper.Map<Customer>(customer);
+        {
+            var isExistCustomer = await _customerRepository.GetAsync(filter: c => c.CustomerID == customer.CustomerID,include:c => c.Include(c => c.User));
+            if (isExistCustomer == null)
+            {
+                return null;
+            }
+            isExistCustomer.CustomerID = customer.CustomerID;
+            isExistCustomer.ContactName = customer.Name;
+            isExistCustomer.Phone = customer.Phone;
+
+            if(isExistCustomer.User.Email != customer.Email)
+            {
+                isExistCustomer.User.Email = customer.Email;
+            }
+            var updatedCustomer = _mapper.Map<Customer>(isExistCustomer);
             return  _mapper.Map<CustomerResponseModel>(await _customerRepository.UpdateAsync(updatedCustomer));
         }
         public async Task<int> DeleteCustomerAsync(string id)

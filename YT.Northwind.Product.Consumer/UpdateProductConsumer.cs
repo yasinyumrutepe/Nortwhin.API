@@ -21,7 +21,7 @@ namespace Northwind.Product.Consumer
                 Categories = product.Categories,
                 UnitPrice = product.UnitPrice,
                 Description = product.Description,
-                UnitsInStock = product.UnitsInStock,
+              UnitsInStock = product.UnitsInStock,
                 Sizes = product.Sizes,
                 Color = product.Color,
             });

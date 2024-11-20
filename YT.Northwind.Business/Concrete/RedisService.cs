@@ -22,9 +22,17 @@ namespace Northwind.Business.Concrete
 
         public T GetData<T>(string key)
         {
-           
-            var data = _distributedCache.GetString(key);
-            return data == null ? default : JsonSerializer.Deserialize<T>(data);
+
+            try
+            {
+                var data = _distributedCache.GetString(key);
+                return string.IsNullOrEmpty(data) ? default : JsonSerializer.Deserialize<T>(data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Deserialization error: {ex.Message}");
+                return default;
+            }
         }
 
   

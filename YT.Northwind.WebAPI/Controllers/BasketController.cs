@@ -23,71 +23,44 @@ namespace Northwind.WebAPI.Controllers
         [HttpGet("detail")]
         public IActionResult GetBasket()
         {
-            var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-
-            return Ok(_basketService.GetBasket(token));
+            var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
+            var basket = _basketService.GetBasket(ipAddress);
+            return Ok(basket);
         }
 
         [HttpPost]
         public IActionResult AddToBasket(BasketRequestModel basketRequest)
         {
+            
+            var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
 
-            var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-
-            var basket = _basketService.AddToBasket(basketRequest, token);
+            var basket = _basketService.AddToBasket(basketRequest, ipAddress);
             return Ok(basket);
         }
 
         [HttpPut("quantity")]
         public IActionResult ChangeQuantity(ChangeQuantityRequestModel changeQuantityRequestModel)
         {
-            var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-            var basket = _basketService.UpdateQuantity(token, changeQuantityRequestModel.ProductID, changeQuantityRequestModel.Quantity);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
+            var basket = _basketService.UpdateQuantity(ipAddress, changeQuantityRequestModel.ProductID, changeQuantityRequestModel.Quantity);
             return Ok(basket);
         }
 
-        [HttpDelete("{productID}")]
-        public IActionResult DeleteFromBasket(int productID)
+        [HttpDelete]
+        public IActionResult DeleteFromBasket([FromQuery]int productID)
         {
-            var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-
-            var basket = _basketService.DeleteFromBasket(token, productID);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
+            var basket = _basketService.DeleteFromBasket(ipAddress, productID);
             return Ok(basket);
         }
 
 
 
-        [HttpGet("campaign/{campaignName}")]
-        public async Task<IActionResult> AddCampaign(string campaignName)
+        [HttpGet("campaign")]
+        public async Task<IActionResult> AddCampaign([FromQuery] string campaignName)
         {
-
-            var token = Request.Headers.Authorization.ToString();
-
-            if (token.StartsWith("Bearer "))
-            {
-                token = token["Bearer ".Length..].Trim();
-            }
-          var basketReq =  await _basketService.AddCampaign(token, campaignName);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString() ?? "127.0.0.1";
+            var basketReq =  await _basketService.AddCampaign(ipAddress,  campaignName );
 
             return Ok(basketReq);
 
